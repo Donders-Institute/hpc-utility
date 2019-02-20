@@ -6,7 +6,7 @@ CLI tools for the High Performance Computing (HPC) cluster.
 
 To build the code, you will need the [GO compiler](https://golang.org).
 
-Following the "GO concept", You also need to identify the `$GOPATH` on your system under which various GO source codes, libraries and binaries are to be stored (and organized).
+Following the "GO concept", identify the `$GOPATH` on your system under which various GO source codes, libraries and binaries will be stored (and organized).
 
 Assuming we use `$HOME/projects/go` as the `$GOPATH`, we will then clone the code of this repository as the follows:
 
