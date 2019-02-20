@@ -1,7 +1,7 @@
 # hpc-cluster-tools
 High Performance Computing (HPC) cluster tools.
 
-## clone and build the code
+## Clone and build the code
 
 To build the code, you will need the [GO compiler](https://golang.org).
 
