@@ -13,13 +13,13 @@ update_dep: $(GOPATH)/bin/dep
 	GOPATH=$(GOPATH) GOOS=linux $(GOPATH)/bin/dep ensure --update
 
 build: build_dep
-	GOPATH=$(GOPATH) GOOS=linux go install Donders-Institute/hpc-cluster-tools/...
+	GOPATH=$(GOPATH) GOOS=linux go install github.com/Donders-Institute/hpc-cluster-tools/...
 
 doc:
 	@GOPATH=$(GOPATH) GOOS=linux godoc -http=:6060
 
 test: build_dep
-	@GOPATH=$(GOPATH) GOOS=linux GOCACHE=off go test -v Donders-Institute/hpc-cluster-tools/test/...
+	@GOPATH=$(GOPATH) GOOS=linux GOCACHE=off go test -v github.com/Donders-Institute/hpc-cluster-tools/test/...
 
 install: build
 	@install -D $(GOPATH)/bin/* $(PREFIX)/bin
