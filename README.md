@@ -1,5 +1,6 @@
 # hpc-cluster-tools
-High Performance Computing (HPC) cluster tools.
+
+CLI tools for the High Performance Computing (HPC) cluster.
 
 ## Clone and build the code
 
