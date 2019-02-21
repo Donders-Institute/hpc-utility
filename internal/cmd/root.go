@@ -1,4 +1,4 @@
-package cluster
+package cmd
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ var initCmd = &cobra.Command{
 	Short: "Initialize with the (sub-)command auto completion.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		f, err := os.Create("cluster")
+		f, err := os.Create("cluster-tool")
 		if err != nil {
 			panic(fmt.Errorf("cannot open file: cluster"))
 		}

@@ -33,12 +33,12 @@ cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; %{
 %install
 mkdir -p %{buildroot}/%{_bindir}
 ## install files for client tools
-install -m 755 %{gopath}/bin/cluster %{buildroot}/%{_bindir}/cluster
-install -m 755 %{gopath}/src/github.com/Donders-Institute/%{name}/cluster %{buildroot}/%{_sysconfdir}/bach_completion.d/cluster
+install -m 755 %{gopath}/bin/cluster-tool %{buildroot}/%{_bindir}/cluster-tool
+install -m 755 %{gopath}/src/github.com/Donders-Institute/%{name}/cluster-tool %{buildroot}/%{_sysconfdir}/bach_completion.d/cluster-tool
 
 %files
-%{_bindir}/cluster
-%{_sysconfdir}/bach_completion.d/cluster
+%{_bindir}/cluster-tool
+%{_sysconfdir}/bach_completion.d/cluster-tool
 
 %clean
 rm -rf %{gopath} 
