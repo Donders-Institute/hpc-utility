@@ -5,6 +5,7 @@ import (
 	"os"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +17,8 @@ var TorqueServerHost string
 
 // TorqueHelperPort is the port number of the Torque Helper service.
 var TorqueHelperPort int
+
+var Logger = logrus.New()
 
 var xml bool
 

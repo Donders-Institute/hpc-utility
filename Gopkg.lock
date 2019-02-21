@@ -73,6 +73,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Donders-Institute/hpc-torque-helper/pkg",
+    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
   ]
   solver-name = "gps-cdcl"
