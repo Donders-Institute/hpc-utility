@@ -1,5 +1,7 @@
 PREFIX ?= "/opt/cluster"
 
+VERSION ?= "master"
+
 all: build
 
 $(GOPATH)/bin/dep:
@@ -23,6 +25,9 @@ test: build_dep
 
 install: build
 	@install -D $(GOPATH)/bin/* $(PREFIX)/bin
+
+release:
+	VERSION=$(VERSION) rpmbuild --undefine=_disable_source_fetch -bb build/rpm/centos7.spec
 
 clean:
 	@rm -rf $(GOPATH)/bin/cluster-*
