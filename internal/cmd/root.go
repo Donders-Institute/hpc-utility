@@ -34,7 +34,7 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "cluster",
+	Use:   "cluster-tool",
 	Short: "Unified CLI for various HPC cluster utilities.",
 	Long:  `A unified command-line interface for different HPC cluster utilities.`,
 }
