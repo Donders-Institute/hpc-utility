@@ -18,7 +18,7 @@ var TorqueServerHost string
 // TorqueHelperPort is the port number of the Torque Helper service.
 var TorqueHelperPort int
 
-var Logger = logrus.New()
+var logger = logrus.New()
 
 var xml bool
 
