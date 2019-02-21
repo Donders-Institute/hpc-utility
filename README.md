@@ -12,8 +12,8 @@ Assuming we use `$HOME/projects/go` as the `$GOPATH`, we will then clone the cod
 
 ```bash
 $ export GOPATH=$HOME/projects/go
-$ mkdir -p $GOPATH/src/github.com
-$ cd $GOPATH/src/github.com
+$ mkdir -p $GOPATH/src/github.com/Donders-Institute
+$ cd $GOPATH/src/github.com/Donders-Institute
 $ git clone https://github.com/Donders-Institute/hpc-cluster-tools.git
 $ cd hpc-cluster-tools
 ```
