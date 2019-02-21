@@ -28,15 +28,17 @@ rm -rf %{gopath}
 mkdir -p %{gopath}/src/github.com/Donders-Institute
 # copy entire directory into gopath, this duplicate the source code
 cp -R %{_builddir}/%{name}-%{version} %{gopath}/src/github.com/Donders-Institute/%{name}
-cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make
+cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; %{gopath}/bin/cluster init
 
 %install
 mkdir -p %{buildroot}/%{_bindir}
 ## install files for client tools
 install -m 755 %{gopath}/bin/cluster %{buildroot}/%{_bindir}/cluster
+install -m 755 %{gopath}/src/github.com/Donders-Institute/%{name}/cluster %{buildroot}/%{_sysconfdir}/bach_completion.d/cluster
 
 %files
 %{_bindir}/cluster
+%{_sysconfdir}/bach_completion.d/cluster
 
 %clean
 rm -rf %{gopath} 

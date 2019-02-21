@@ -30,13 +30,27 @@ func init() {
 	configCmd.Flags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	configCmd.Flags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 
-	rootCmd.AddCommand(qstatCmd, configCmd)
+	rootCmd.AddCommand(initCmd, qstatCmd, configCmd)
 }
 
 var rootCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "Unified CLI for various HPC cluster utilities.",
 	Long:  `A unified command-line interface for different HPC cluster utilities.`,
+}
+
+var initCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialize with the (sub-)command auto completion.",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		f, err := os.Create("cluster")
+		if err != nil {
+			panic(fmt.Errorf("cannot open file: cluster"))
+		}
+		defer f.Close()
+		rootCmd.GenBashCompletion(f)
+	},
 }
 
 var qstatCmd = &cobra.Command{
