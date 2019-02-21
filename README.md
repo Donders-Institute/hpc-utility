@@ -30,7 +30,7 @@ After the build, the binaries will be located under various subdirectories in th
 
 ### Folder structure of the repository
 
-The repository holds a GO project.  The folders are organized according to the [GO standard](https://github.com/golang-standards/project-layout).
+The repository holds a GO project.  The folders are organized according to the [GO standard](https://github.com/golang-standards/project-layout). The rationale of this style of organization is explained [in this post](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2).
 
 ### The `Makefile`
 
