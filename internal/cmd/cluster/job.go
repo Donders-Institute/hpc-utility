@@ -1,9 +1,6 @@
 package cluster
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/spf13/cobra"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg"
@@ -11,6 +8,9 @@ import (
 
 func init() {
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
+	jobCmd.PersistentFlags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
+	jobCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
+
 	rootCmd.AddCommand(jobCmd)
 }
 
@@ -18,13 +18,10 @@ var jobCmd = &cobra.Command{
 	Use:   "job",
 	Short: "Retrieve privileged information of a Torque job.",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Print: " + strings.Join(args, " "))
-	},
 }
 
 var jobTraceCmd = &cobra.Command{
-	Use:   "trace",
+	Use:   "trace [JobID]",
 	Short: "Print job's trace log available on the Torque server.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -34,7 +31,7 @@ var jobTraceCmd = &cobra.Command{
 }
 
 var jobMeminfoCmd = &cobra.Command{
-	Use:   "meminfo",
+	Use:   "meminfo [JobID]",
 	Short: "Print memory usage of a running job.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),

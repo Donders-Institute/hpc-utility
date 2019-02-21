@@ -29,10 +29,6 @@
   branch = "master"
   name = "github.com/Donders-Institute/hpc-torque-helper"
 
-[[constraint]]
-  name = "github.com/sirupsen/logrus"
-  version = "1.3.0"
-
 [prune]
   go-tests = true
   unused-packages = true

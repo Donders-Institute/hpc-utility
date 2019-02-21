@@ -3,7 +3,6 @@ package cluster
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg"
 	"github.com/spf13/cobra"
@@ -21,11 +20,15 @@ var TorqueHelperPort int
 var xml bool
 
 func init() {
+
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
-	rootCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 
 	qstatCmd.Flags().BoolVarP(&xml, "xml", "x", false, "XML output")
+	qstatCmd.Flags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
+	qstatCmd.Flags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
+
+	configCmd.Flags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
+	configCmd.Flags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 
 	rootCmd.AddCommand(qstatCmd, configCmd)
 }
@@ -34,9 +37,6 @@ var rootCmd = &cobra.Command{
 	Use:   "cluster",
 	Short: "Unified CLI for various HPC cluster utilities.",
 	Long:  `A unified command-line interface for different HPC cluster utilities.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Print: " + strings.Join(args, " "))
-	},
 }
 
 var qstatCmd = &cobra.Command{

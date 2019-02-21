@@ -7,7 +7,7 @@
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = ["pkg"]
   pruneopts = "UT"
-  revision = "d9e8c631a7ada191de64eeb2560ba74c42434d41"
+  revision = "5525e9d66aa2ac565e79bd9bc325a2cab24ada92"
 
 [[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
@@ -55,25 +55,24 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "74369b46fc6756741c016591724fd1cb8e26845f"
+  revision = "a4c6cb3142f211c99e4bf4cd769535b29a9b616f"
 
 [[projects]]
   branch = "master"
-  digest = "1:0d703f14f9bbbe1070ff0ce86d749dcbc9d68fb0ae554252c09bd4bb37a072e7"
+  digest = "1:d10678d54787343b2250cdf8ede1d7ce2a80941823f33ca9e4ca33eebb63a3c9"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "153ac476189d567564fda94622d7a8c0fb338f6b"
+  revision = "b4e8571b14e03cc164df06f72b640ebce3899579"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/Donders-Institute/hpc-torque-helper/pkg",
-    "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
   ]
   solver-name = "gps-cdcl"
