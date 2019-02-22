@@ -60,6 +60,7 @@ var qstatCmd = &cobra.Command{
 	Use:   "qstat",
 	Short: "Print job list in the memory of the Torque server.",
 	Long:  ``,
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		trqhelper.PrintClusterQstat(TorqueServerHost, TorqueHelperPort, xml)
 	},
@@ -69,6 +70,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print Torque and Moab server configurations.",
 	Long:  ``,
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		trqhelper.PrintClusterConfig(TorqueServerHost, TorqueHelperPort)
 	},
