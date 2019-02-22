@@ -46,7 +46,7 @@ var createCmd = &cobra.Command{
 		// check if args[0] is a valid file
 		s, err := os.Stat(args[0])
 		if err != nil {
-			return fmt.Errorf("file not available: %s, error: %s", args[0], err)
+			return err
 		}
 		if !s.Mode().IsRegular() {
 			return fmt.Errorf("not a regular file: %s", args[0])

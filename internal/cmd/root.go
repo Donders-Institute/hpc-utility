@@ -77,7 +77,7 @@ var configCmd = &cobra.Command{
 // Execute is the main entry point of the cluster command.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		logger.Errorln(err)
 		os.Exit(1)
 	}
 }
