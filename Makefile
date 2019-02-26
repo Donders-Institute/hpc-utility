@@ -4,6 +4,8 @@ VERSION ?= "master"
 
 GOOS ?= "linux"
 
+SECRET ?= "my-secret"
+
 all: build
 
 $(GOPATH)/bin/dep:
@@ -17,13 +19,17 @@ update_dep: $(GOPATH)/bin/dep
 	GOPATH=$(GOPATH) GOOS=$(GOOS) $(GOPATH)/bin/dep ensure --update
 
 build: build_dep
-	GOPATH=$(GOPATH) GOOS=$(GOOS) go install github.com/Donders-Institute/hpc-cluster-tools/...
+	GOPATH=$(GOPATH) GOOS=$(GOOS) go install \
+	-ldflags "-X github.com/Donders-Institute/hpc-torque-helper/internal/grpc.secret=$(SECRET)" \
+	github.com/Donders-Institute/hpc-cluster-tools/...
 
 doc:
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) godoc -http=:6060
 
 test: build_dep
-	@GOPATH=$(GOPATH) GOOS=$(GOOS) GOCACHE=off go test -v github.com/Donders-Institute/hpc-cluster-tools/test/...
+	@GOPATH=$(GOPATH) GOOS=$(GOOS) GOCACHE=off go test \
+	-ldflags "-X github.com/Donders-Institute/hpc-torque-helper/internal/grpc.secret=$(SECRET)" \
+	-v github.com/Donders-Institute/hpc-cluster-tools/test/...
 
 install: build
 	@install -D $(GOPATH)/bin/* $(PREFIX)/bin
