@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg"
+	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +18,9 @@ var TorqueServerHost string
 // TorqueHelperPort is the port number of the Torque Helper service.
 var TorqueHelperPort int
 
+// TorqueHelperCert is the path of the TorqueHelper server certificate.
+var TorqueHelperCert string
+
 var logger = logrus.New()
 
 var xml bool
@@ -29,9 +32,11 @@ func init() {
 	qstatCmd.Flags().BoolVarP(&xml, "xml", "x", false, "XML output")
 	qstatCmd.Flags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	qstatCmd.Flags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
+	qstatCmd.Flags().StringVarP(&TorqueHelperCert, "cert", "c", "", "Torque helper service certificate")
 
 	configCmd.Flags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	configCmd.Flags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
+	configCmd.Flags().StringVarP(&TorqueHelperCert, "cert", "c", "", "Torque helper service certificate")
 
 	rootCmd.AddCommand(initCmd, qstatCmd, configCmd)
 }
@@ -62,7 +67,12 @@ var qstatCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		trqhelper.PrintClusterQstat(TorqueServerHost, TorqueHelperPort, xml)
+		c := trqhelper.TorqueHelperSrvClient{
+			SrvHost:     TorqueServerHost,
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+		c.PrintClusterQstat(xml)
 	},
 }
 
@@ -72,7 +82,12 @@ var configCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		trqhelper.PrintClusterConfig(TorqueServerHost, TorqueHelperPort)
+		c := trqhelper.TorqueHelperSrvClient{
+			SrvHost:     TorqueServerHost,
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+		c.PrintClusterConfig()
 	},
 }
 

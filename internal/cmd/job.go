@@ -1,15 +1,15 @@
 package cmd
 
 import (
+	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	"github.com/spf13/cobra"
-
-	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg"
 )
 
 func init() {
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	jobCmd.PersistentFlags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	jobCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
+	jobCmd.Flags().StringVarP(&TorqueHelperCert, "cert", "c", "", "Torque helper service certificate")
 
 	rootCmd.AddCommand(jobCmd)
 }
@@ -26,7 +26,12 @@ var jobTraceCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		trqhelper.PrintClusterTracejob(args[0], TorqueServerHost, TorqueHelperPort)
+		c := trqhelper.TorqueHelperSrvClient{
+			SrvHost:     TorqueServerHost,
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+		c.PrintClusterTracejob(args[0])
 	},
 }
 
@@ -36,6 +41,11 @@ var jobMeminfoCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		trqhelper.PrintJobMemoryInfo(args[0], TorqueHelperPort)
+		c := trqhelper.TorqueHelperMomClient{
+			SrvHost:     TorqueServerHost,
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+		c.PrintJobMemoryInfo(args[0])
 	},
 }
