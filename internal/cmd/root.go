@@ -72,7 +72,9 @@ var qstatCmd = &cobra.Command{
 			SrvPort:     TorqueHelperPort,
 			SrvCertFile: TorqueHelperCert,
 		}
-		c.PrintClusterQstat(xml)
+		if err := c.PrintClusterQstat(xml); err != nil {
+			logger.Errorf("%+v\n", err)
+		}
 	},
 }
 
@@ -87,7 +89,9 @@ var configCmd = &cobra.Command{
 			SrvPort:     TorqueHelperPort,
 			SrvCertFile: TorqueHelperCert,
 		}
-		c.PrintClusterConfig()
+		if err := c.PrintClusterConfig(); err != nil {
+			logger.Errorf("%+v\n", err)
+		}
 	},
 }
 
