@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fa5fa8e86a0a9ca59e5b0c7da6137b1ae42fedaea3fd0098ba41c99746fb395a"
+  digest = "1:bd41db6ddf0f0eae2d1de8a39c981f0eeb7c38415a7c86cf78d0dbfcf4bbf4ff"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
     "internal/grpc",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "0869f8bdb65dfa43e3fe68ca5466e7750395bd1c"
+  revision = "a091473e3e5e624c9f88a558e01f135340e669e6"
 
 [[projects]]
   digest = "1:5ac24c0ad5dc117fb2b6d90d205c876ec599c09cccb702a36586680e09cb20b5"
