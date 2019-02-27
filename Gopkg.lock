@@ -3,17 +3,17 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bd41db6ddf0f0eae2d1de8a39c981f0eeb7c38415a7c86cf78d0dbfcf4bbf4ff"
+  digest = "1:1b26229926b37de4a6e7ffc0b7b32867821543175279458627b10a48c36a87e9"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
     "internal/grpc",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "a091473e3e5e624c9f88a558e01f135340e669e6"
+  revision = "5bab32d4a01f3f5eed77e8a1ce21f8ce92609569"
 
 [[projects]]
-  digest = "1:5ac24c0ad5dc117fb2b6d90d205c876ec599c09cccb702a36586680e09cb20b5"
+  digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -24,8 +24,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
+  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
@@ -36,12 +36,12 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
-  version = "v1.0.1"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
   digest = "1:87c2e02fb01c27060ccc5ba7c5a407cc91147726f8f40b70cceeedbc52b1f3a8"
@@ -89,7 +89,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "66a96c8a540e84140eaf74e38bb3a0a2ff5e5c53"
+  revision = "312bce6e941fc7e152b630a8643ea239afc12ddd"
 
 [[projects]]
   branch = "master"
@@ -100,7 +100,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "cc5685c2db1239775905f3911f0067c0fa74762f"
+  revision = "775f8194d0f9e65c46913c7be783d3d95a29333c"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
