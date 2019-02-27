@@ -9,7 +9,7 @@ func init() {
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	jobCmd.PersistentFlags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	jobCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
-	jobCmd.Flags().StringVarP(&TorqueHelperCert, "cert", "c", "", "Torque helper service certificate")
+	jobCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", "", "Torque helper service certificate")
 
 	rootCmd.AddCommand(jobCmd)
 }
