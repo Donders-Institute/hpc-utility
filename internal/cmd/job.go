@@ -31,7 +31,9 @@ var jobTraceCmd = &cobra.Command{
 			SrvPort:     TorqueHelperPort,
 			SrvCertFile: TorqueHelperCert,
 		}
-		c.PrintClusterTracejob(args[0])
+		if err := c.PrintClusterTracejob(args[0]); err != nil {
+			logger.Errorf("fail get job trace info: %+v\n", err)
+		}
 	},
 }
 
@@ -46,6 +48,8 @@ var jobMeminfoCmd = &cobra.Command{
 			SrvPort:     TorqueHelperPort,
 			SrvCertFile: TorqueHelperCert,
 		}
-		c.PrintJobMemoryInfo(args[0])
+		if err := c.PrintJobMemoryInfo(args[0]); err != nil {
+			logger.Errorf("fail get job memory utilisation: %+v\n", err)
+		}
 	},
 }
