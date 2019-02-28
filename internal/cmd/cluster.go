@@ -214,7 +214,7 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 	w.Init(os.Stdout, 8, 20, 0, '\t', 0)
 	defer w.Flush()
 
-	headers = headers[0:4]
+	headers = headers[0:3]
 	var bars []string
 	for i := 0; i < len(headers); i++ {
 		bars = append(bars, strings.Repeat("-", len(headers[i])))
