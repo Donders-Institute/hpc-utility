@@ -30,11 +30,11 @@ const (
 var defTorqueHelperCert string
 
 // Ganglia URLs for retriving node resource information
-var gangliaAccessNodeMeminfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=mem_total.VAL&cols[]=mem_free.VAL&noheader"
-var gangliaAccessNodeDiskinfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=disk_total.VAL&cols[]=disk_free.VAL&noheader"
+var gangliaAccessNodeMeminfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=mem_free.VAL&cols[]=mem_total.VAL&noheader"
+var gangliaAccessNodeDiskinfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader"
 
-var gangliaComputeNodeMeminfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=mem_total.VAL&cols[]=mem_free.VAL&noheader"
-var gangliaComputeNodeDiskinfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=disk_total.VAL&cols[]=disk_free.VAL&noheader"
+var gangliaComputeNodeMeminfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=mem_free.VAL&cols[]=mem_total.VAL&noheader"
+var gangliaComputeNodeDiskinfoURL = "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader"
 
 func init() {
 
@@ -185,7 +185,7 @@ var nodeMeminfoCmd = &cobra.Command{
 				log.Errorln(err)
 				continue
 			}
-			printGangliaResources(resources, []string{"hostname", "free", "totla"})
+			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
 		}
 	},
 }
@@ -211,7 +211,7 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 	})
 
 	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 8, 20, 0, '\t', 0)
+	w.Init(os.Stdout, 8, 8, 0, '\t', tabwriter.AlignRight)
 	defer w.Flush()
 
 	headers = headers[0:3]
@@ -220,10 +220,10 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 		bars = append(bars, strings.Repeat("-", len(headers[i])))
 	}
 
-	fmt.Fprintf(w, "\n %s\t%s\t%s\t", headers[0], headers[1], headers[2])
-	fmt.Fprintf(w, "\n %s\t%s\t%s\t", bars[0], bars[1], bars[2])
+	fmt.Fprintf(w, "\n %20s\t%4s\t%4s\t", headers[0], headers[1], headers[2])
+	fmt.Fprintf(w, "\n %20s\t%4s\t%4s\t", bars[0], bars[1], bars[2])
 	for _, r := range resources {
-		fmt.Fprintf(w, "\n %s\t%d\t%d\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
+		fmt.Fprintf(w, "\n %20s\t%4d\t%4d\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
 	}
 }
 
