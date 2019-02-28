@@ -152,13 +152,13 @@ var nodeTypeNames = map[nodeType]string{
 }
 
 var nodeCmd = &cobra.Command{
-	Use:       "nodes",
-	Short:     "Retrieve information about cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		// TODO: get nodes overview
-	},
+	Use:   "nodes",
+	Short: "Retrieve information about cluster nodes.",
+	Long:  ``,
+	// ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
+	// Run: func(cmd *cobra.Command, args []string) {
+	// 	// TODO: get nodes overview
+	// },
 }
 
 var nodeMeminfoCmd = &cobra.Command{
