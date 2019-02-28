@@ -49,6 +49,7 @@ var createCmd = &cobra.Command{
 		url, err := webhook.New(args[0])
 		if err != nil {
 			log.Errorf("fail creating new webhook: %+v\n", err)
+			return
 		}
 		log.Infof("webhook created successfully with URL: %s\n", url.String())
 	},
@@ -64,9 +65,10 @@ var listCmd = &cobra.Command{
 		ws, err := webhook.List()
 		if err != nil {
 			log.Errorf("fail retriving list of webhooks: %+v\n", err)
+			return
 		}
 		for w := range ws {
-			log.Infof("- %s\n", w)
+			log.Infof("- %+v\n", w)
 		}
 	},
 }
