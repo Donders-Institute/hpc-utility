@@ -173,6 +173,10 @@ var nodeMeminfoCmd = &cobra.Command{
 			nodeTypeNames[compute]: gangliaComputeNodeMeminfoURL,
 		}
 
+		if len(args) == 0 {
+			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
+		}
+
 		for _, n := range args {
 
 			url, err := url.Parse(urls[n])
@@ -206,6 +210,10 @@ var nodeDiskinfoCmd = &cobra.Command{
 		urls := map[string]string{
 			nodeTypeNames[access]:  gangliaAccessNodeDiskinfoURL,
 			nodeTypeNames[compute]: gangliaComputeNodeDiskinfoURL,
+		}
+
+		if len(args) == 0 {
+			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
 		}
 
 		for _, n := range args {
