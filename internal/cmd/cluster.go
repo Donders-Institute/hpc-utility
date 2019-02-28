@@ -187,8 +187,8 @@ var nodeMeminfoCmd = &cobra.Command{
 			}
 			// scale to GB, as the unit from ganglia is in MB
 			for _, r := range resources {
-				r.Free = r.Free * 1024 / gib
-				r.Total = r.Total * 1024 / gib
+				r.Free = r.Free * 1024. / gib
+				r.Total = r.Total * 1024. / gib
 			}
 			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
 		}
