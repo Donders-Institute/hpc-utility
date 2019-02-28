@@ -229,8 +229,8 @@ type gangliaRawHTML struct {
 // gangliaResource is a data object of a ganglia resource.
 type gangliaResource struct {
 	Host  string
-	Free  int64
-	Total int64
+	Free  float64
+	Total float64
 }
 
 func printGangliaResources(resources []gangliaResource, headers []string) {
@@ -333,6 +333,12 @@ func parseGangliaRawdata(reader *csv.Reader, v interface{}) error {
 				return err
 			}
 			f.SetInt(ival)
+		case "float64":
+			fval, err := strconv.ParseFloat(record[i], 64)
+			if err != nil {
+				return err
+			}
+			f.SetFloat(fval)
 		default:
 			return fmt.Errorf("unsupported type: %s", f.Type().String())
 		}
