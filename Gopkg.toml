@@ -24,9 +24,8 @@
 #   go-tests = true
 #   unused-packages = true
 
-
 [[constraint]]
-  branch = "master"
+  version = "1.0.0"
   name = "github.com/Donders-Institute/hpc-torque-helper"
 
 [prune]
