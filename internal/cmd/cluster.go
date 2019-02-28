@@ -44,7 +44,7 @@ func init() {
 	clusterCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd)
+	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, jobCmd, nodeCmd)
 
@@ -171,6 +171,35 @@ var nodeMeminfoCmd = &cobra.Command{
 		urls := map[string]string{
 			nodeTypeNames[access]:  gangliaAccessNodeMeminfoURL,
 			nodeTypeNames[compute]: gangliaComputeNodeMeminfoURL,
+		}
+
+		for _, n := range args {
+
+			url, err := url.Parse(urls[n])
+			if err != nil {
+				log.Errorf("invalid URL: %s\n", url)
+				continue
+			}
+			resources, err := getGangliaResources(url)
+			if err != nil {
+				log.Errorln(err)
+				continue
+			}
+			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
+		}
+	},
+}
+
+var nodeDiskinfoCmd = &cobra.Command{
+	Use:       "diskfree",
+	Short:     "Print total and free disk space of the cluster's access nodes.",
+	Long:      ``,
+	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
+	Run: func(cmd *cobra.Command, args []string) {
+
+		urls := map[string]string{
+			nodeTypeNames[access]:  gangliaAccessNodeDiskinfoURL,
+			nodeTypeNames[compute]: gangliaComputeNodeDiskinfoURL,
 		}
 
 		for _, n := range args {
