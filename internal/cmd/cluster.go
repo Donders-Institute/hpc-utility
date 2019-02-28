@@ -185,6 +185,11 @@ var nodeMeminfoCmd = &cobra.Command{
 				log.Errorln(err)
 				continue
 			}
+			// scale to GB, as the unit from ganglia is in MB
+			for _, r := range resources {
+				r.Free = r.Free * 1024 / gib
+				r.Total = r.Total * 1024 / gib
+			}
 			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
 		}
 	},
@@ -252,7 +257,7 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", headers[0], headers[1], headers[2])
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", bars[0], bars[1], bars[2])
 	for _, r := range resources {
-		fmt.Fprintf(w, "\n %20s\t%10.f\t%10.f\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
+		fmt.Fprintf(w, "\n %20s\t%10.1f\t%10.1f\t", r.Host, r.Free, r.Total)
 	}
 	fmt.Fprintf(w, "\n")
 }
