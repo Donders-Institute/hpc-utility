@@ -4,6 +4,11 @@ VERSION ?= "master"
 
 GOOS ?= "linux"
 
+CACERTDIR ?= "/etc/pki/tls/certs"
+
+GOLDFLAGS = "-X github.com/Donders-Institute/hpc-cluster-tools/internal/cmd.defTorqueHelperCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt \
+-X github.com/Donders-Institute/hpc-cluster-tools/internal/cmd.defQaasCert=/etc/pki/tlk/certs/star_dccn_nl.chained.crt"
+
 all: build
 
 $(GOPATH)/bin/dep:
@@ -17,15 +22,15 @@ update_dep: $(GOPATH)/bin/dep
 	GOPATH=$(GOPATH) GOOS=$(GOOS) $(GOPATH)/bin/dep ensure --update
 
 build: build_dep
-	GOPATH=$(GOPATH) GOOS=$(GOOS) go install \
-	github.com/Donders-Institute/hpc-cluster-tools/...
+	GOPATH=$(GOPATH) GOOS=$(GOOS) GOLDFLAGS=$(GOLDFLAGS) go install \
+	-ldflags $(GOLDFLAGS) -v github.com/Donders-Institute/hpc-cluster-tools/...
 
 doc:
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) godoc -http=:6060
 
 test: build_dep
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) GOCACHE=off go test \
-	-v github.com/Donders-Institute/hpc-cluster-tools/...
+	-ldflags $(GOLDFLAGS) -v github.com/Donders-Institute/hpc-cluster-tools/...
 
 install: build
 	@install -D $(GOPATH)/bin/* $(PREFIX)/bin

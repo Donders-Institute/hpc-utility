@@ -28,18 +28,18 @@ rm -rf %{gopath}
 mkdir -p %{gopath}/src/github.com/Donders-Institute
 # copy entire directory into gopath, this duplicate the source code
 cp -R %{_builddir}/%{name}-%{version} %{gopath}/src/github.com/Donders-Institute/%{name}
-cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; %{gopath}/bin/cluster-tool init
+cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; %{gopath}/bin/hpcutil-gpc > hpcutil
 
 %install
 mkdir -p %{buildroot}/%{_bindir}
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d
 ## install files for client tools
-install -m 755 %{gopath}/bin/cluster-tool %{buildroot}/%{_bindir}/cluster-tool
-install -m 644 %{gopath}/src/github.com/Donders-Institute/%{name}/cluster-tool %{buildroot}/%{_sysconfdir}/bash_completion.d/cluster-tool
+install -m 755 %{gopath}/bin/hpcutil %{buildroot}/%{_bindir}/hpcutil
+install -m 644 %{gopath}/src/github.com/Donders-Institute/%{name}/hpcutil %{buildroot}/%{_sysconfdir}/bash_completion.d/hpcutil
 
 %files
-%{_bindir}/cluster-tool
-%{_sysconfdir}/bash_completion.d/cluster-tool
+%{_bindir}/hpcutil
+%{_sysconfdir}/bash_completion.d/hpcutil
 
 %clean
 rm -rf %{gopath} 

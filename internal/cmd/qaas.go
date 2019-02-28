@@ -2,36 +2,35 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
+	qaas "github.com/Donders-Institute/hpc-qaas/pkg/client"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var qaasHost string
 var qaasPort int
+var qaasCertFile string
 var webhookName string
+
+// variable may be set at the build time to fix the default location for the QaaS server certificate.
+var defQaasCert string
 
 func init() {
 
-	webhookCmd.PersistentFlags().StringVarP(&qaasHost, "server", "s", "qaas.dccn.nl", "QaaS service hostname")
-	webhookCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 5111, "QaaS service hostname")
+	qaasCmd.PersistentFlags().StringVarP(&qaasHost, "server", "s", "qaas.dccn.nl", "QaaS service hostname")
+	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 5111, "QaaS service hostname")
+	qaasCmd.PersistentFlags().StringVarP(&qaasCertFile, "cert", "c", defQaasCert, "QaaS service SSL certificate")
 
 	createCmd.Flags().StringVarP(&webhookName, "name", "n", "MyHook", "name of the webhook")
 
-	webhookCmd.AddCommand(createCmd, deleteCmd, infoCmd, triggerCmd)
-	qaasCmd.AddCommand(webhookCmd)
+	qaasCmd.AddCommand(createCmd, deleteCmd, infoCmd, triggerCmd, listCmd)
 	rootCmd.AddCommand(qaasCmd)
 }
 
 var qaasCmd = &cobra.Command{
-	Use:   "qaas",
-	Short: "Perform an action on the Qsub-as-a-Service (QaaS).",
-	Long:  ``,
-}
-
-var webhookCmd = &cobra.Command{
 	Use:   "webhook",
-	Short: "Manage webhooks.",
+	Short: "Manage webhooks on the Qsub-as-a-Service (QaaS).",
 	Long:  ``,
 }
 
@@ -43,18 +42,32 @@ var createCmd = &cobra.Command{
 		if len(args) != 1 {
 			return fmt.Errorf("expect 1 script, given %d", len(args))
 		}
-		// check if args[0] is a valid file
-		s, err := os.Stat(args[0])
-		if err != nil {
-			return err
-		}
-		if !s.Mode().IsRegular() {
-			return fmt.Errorf("not a regular file: %s", args[0])
-		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Warnf("Not implemented!!")
+		webhook := qaas.Webhook{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		url, err := webhook.New(args[0])
+		if err != nil {
+			log.Errorf("fail creating new webhook: %+v\n", err)
+		}
+		log.Infof("webhook created successfully with URL: %s\n", url.String())
+	},
+}
+
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List availabile webhooks.",
+	Long:  ``,
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		webhook := qaas.Webhook{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		ws, err := webhook.List()
+		if err != nil {
+			log.Errorf("fail retriving list of webhooks: %+v\n", err)
+		}
+		for w := range ws {
+			log.Infof("- %s\n", w)
+		}
 	},
 }
 
@@ -64,7 +77,7 @@ var deleteCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Warnf("Not implemented!!")
+		log.Warnf("Not implemented!!")
 	},
 }
 
@@ -74,7 +87,7 @@ var infoCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Warnf("Not implemented!!")
+		log.Warnf("Not implemented!!")
 	},
 }
 
@@ -84,6 +97,6 @@ var triggerCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Warnf("Not implemented!!")
+		log.Warnf("Not implemented!!")
 	},
 }
