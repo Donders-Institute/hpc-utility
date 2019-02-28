@@ -252,7 +252,7 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", headers[0], headers[1], headers[2])
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", bars[0], bars[1], bars[2])
 	for _, r := range resources {
-		fmt.Fprintf(w, "\n %20s\t%10d\t%10d\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
+		fmt.Fprintf(w, "\n %20s\t%10.f\t%10.f\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
 	}
 	fmt.Fprintf(w, "\n")
 }
