@@ -185,12 +185,13 @@ var nodeMeminfoCmd = &cobra.Command{
 				log.Errorln(err)
 				continue
 			}
-			// scale to GB, as the unit from ganglia is in MB
-			for _, r := range resources {
-				r.Free = r.Free * 1024. / gib
-				r.Total = r.Total * 1024. / gib
+
+			// scaler function to set Free and Total to unit of GB.
+			scaler := func(v float64) float64 {
+				return v * 1024 / gib
 			}
-			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
+
+			printGangliaResources(resources, scaler, []string{"hostname", "free(GB)", "total(GB)"})
 		}
 	},
 }
@@ -219,7 +220,11 @@ var nodeDiskinfoCmd = &cobra.Command{
 				log.Errorln(err)
 				continue
 			}
-			printGangliaResources(resources, []string{"hostname", "free(GB)", "total(GB)"})
+
+			scaler := func(v float64) float64 {
+				return v
+			}
+			printGangliaResources(resources, scaler, []string{"hostname", "free(GB)", "total(GB)"})
 		}
 	},
 }
@@ -238,7 +243,7 @@ type gangliaResource struct {
 	Total float64
 }
 
-func printGangliaResources(resources []gangliaResource, headers []string) {
+func printGangliaResources(resources []gangliaResource, scaler func(float64) float64, headers []string) {
 	// sort resources by hostname
 	sort.Slice(resources, func(i, j int) bool {
 		return resources[i].Host < resources[j].Host
@@ -257,7 +262,7 @@ func printGangliaResources(resources []gangliaResource, headers []string) {
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", headers[0], headers[1], headers[2])
 	fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", bars[0], bars[1], bars[2])
 	for _, r := range resources {
-		fmt.Fprintf(w, "\n %20s\t%10.1f\t%10.1f\t", r.Host, r.Free, r.Total)
+		fmt.Fprintf(w, "\n %20s\t%10.1f\t%10.1f\t", r.Host, scaler(r.Free), scaler(r.Total))
 	}
 	fmt.Fprintf(w, "\n")
 }
