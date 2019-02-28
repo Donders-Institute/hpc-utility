@@ -23,7 +23,7 @@ import (
 var xml bool
 
 const (
-	gib int64 = 1024 * 1024 * 1024
+	gib float64 = 1024 * 1024 * 1024
 )
 
 // variable may be set at the build time to fix the default location for the TorqueHelper server certificate.
