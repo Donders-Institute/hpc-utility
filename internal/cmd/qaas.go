@@ -67,7 +67,7 @@ var listCmd = &cobra.Command{
 			log.Errorf("fail retriving list of webhooks: %+v\n", err)
 			return
 		}
-		for w := range ws {
+		for _, w := range ws {
 			log.Infof("- %+v\n", w)
 		}
 	},
