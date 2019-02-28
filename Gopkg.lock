@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2df78639ca5de4ddaaea17c1f1ce5febdddbc84f0c2b1501ddae9d0c7122ff1b"
+  digest = "1:c4f7bff7701655d1712757d387d55fa9d279cb1a5b559d0ad0a8720a9986d226"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "cea7a06707f527ec1459f999bd9de97b9409cc85"
+  revision = "19bf4110bbbe711e7936897f817981d84037ffe8"
 
 [[projects]]
   digest = "1:318e402e391e5b071b418dbd751ce097d4241f108954ab13b1c18e7f0f51430a"
@@ -100,11 +100,20 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:058e9504b9a79bfe86092974d05bb3298d2aa0c312d266d43148de289a5065d9"
+  digest = "1:5b1e3560b10bebafefcafa45db8cb121bfa1994b1503997b8b46631c2540e79a"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
+    "poly1305",
+    "ssh",
+    "ssh/terminal",
+  ]
   pruneopts = "UT"
-  revision = "31a38585487a4b1fd6ff4f8f3db26f1fb296ac82"
+  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
 
 [[projects]]
   branch = "master"
@@ -120,18 +129,19 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "c95aed5357e77a4bf7d3955c46740000a17adee1"
+  revision = "92fc7df08ae7536330f5a21328292abfa70520a8"
 
 [[projects]]
   branch = "master"
-  digest = "1:80200f57d482f61334a482a046ddedbad77c04dbec6ab81a4e1b3c6adbdfadef"
+  digest = "1:1cecc41d51d8c61ed4840b7aa831a6bf1750b2a7a75eb5c75c593e79552c87de"
   name = "golang.org/x/sys"
   packages = [
+    "cpu",
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "92a0ff1e1e2f61773648454ec71ec0c0f1c700a2"
+  revision = "a34e9553db1e492c9a76e60db2296ae7e5fbb772"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"

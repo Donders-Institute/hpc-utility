@@ -8,9 +8,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	log "github.com/sirupsen/logrus"
@@ -102,7 +105,7 @@ var jobCmd = &cobra.Command{
 }
 
 var jobTraceCmd = &cobra.Command{
-	Use:   "jobtrace [JobID]",
+	Use:   "trace [JobID]",
 	Short: "Print job's trace log available on the Torque server.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -119,7 +122,7 @@ var jobTraceCmd = &cobra.Command{
 }
 
 var jobMeminfoCmd = &cobra.Command{
-	Use:   "jobmeminfo [JobID]",
+	Use:   "meminfo [JobID]",
 	Short: "Print memory usage of a running job.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -136,23 +139,38 @@ var jobMeminfoCmd = &cobra.Command{
 }
 
 // node related subcommands
+type nodeType uint
+
+const (
+	access nodeType = iota
+	compute
+)
+
+var nodeTypeNames = map[nodeType]string{
+	access:  "access",
+	compute: "compute",
+}
+
 var nodeCmd = &cobra.Command{
-	Use:   "node",
-	Short: "Retrieve information about cluster nodes.",
-	Long:  ``,
+	Use:       "nodes",
+	Short:     "Retrieve information about cluster nodes.",
+	Long:      ``,
+	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
+	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: get nodes overview
+	},
 }
 
 var nodeMeminfoCmd = &cobra.Command{
-	Use:        "memfree",
-	Short:      "Print total and free memory of the cluster's access nodes.",
-	Long:       ``,
-	ValidArgs:  []string{"access", "compute"},
-	ArgAliases: []string{"access", "a", "compute", "c"},
+	Use:       "memfree",
+	Short:     "Print total and free memory of the cluster's access nodes.",
+	Long:      ``,
+	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		urls := map[string]string{
-			"access":  gangliaAccessNodeMeminfoURL,
-			"compute": gangliaComputeNodeMeminfoURL,
+			nodeTypeNames[access]:  gangliaAccessNodeMeminfoURL,
+			nodeTypeNames[compute]: gangliaComputeNodeMeminfoURL,
 		}
 
 		for _, n := range args {
@@ -162,69 +180,104 @@ var nodeMeminfoCmd = &cobra.Command{
 				log.Errorf("invalid URL: %s\n", url)
 				continue
 			}
-
-			// make HTTP GET call to the ganglia endpoint.
-			c := &http.Client{}
-			req, _ := http.NewRequest("GET", url.String(), nil)
-			resp, err := c.Do(req)
+			resources, err := getGangliaResources(url)
 			if err != nil {
-				log.Errorf("%s", err)
+				log.Errorln(err)
 				continue
 			}
-			if resp.StatusCode != 200 {
-				log.Errorf("fail get ganglia data: %s (HTTP CODE %d)", url.String(), resp.StatusCode)
-				continue
-			}
-
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-
-			// the tabular data is enclosed by <pre></pre> tag in the returned HTML.
-			data := gangliaRawHTML{}
-			if err := pxml.Unmarshal(body, &data); err != nil {
-				log.Errorf("fail get ganglia data: %s\n", err)
-				continue
-			}
-
-			log.Debugf("ganglia tabular data: %s\n", data.Pre)
-
-			// parse the tabular data
-			r := csv.NewReader(strings.NewReader(data.Pre))
-			r.Comma = '\t'
-			r.TrailingComma = true
-			r.TrimLeadingSpace = true
-			r.LazyQuotes = true
-			for {
-				o := gangliaResourceInfo{}
-				err := parseGangliaRawdata(r, &o)
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					log.Debugf("%+v\n", err)
-					continue
-				}
-				log.Infoln(o.String())
-			}
+			printGangliaResources(resources, []string{"hostname", "free", "totla"})
 		}
 	},
 }
 
+// gangliaRawHTML is a data object for unmarshaling the HTML document retrieved from ganglia.
+// The `Pre` attribute contains actual raw data of the resource information.
 type gangliaRawHTML struct {
 	XMLName pxml.Name `xml:"html"`
 	Pre     string    `xml:"body>pre"`
 }
 
-type gangliaResourceInfo struct {
+// gangliaResource is a data object of a ganglia resource.
+type gangliaResource struct {
 	Host  string
-	Total int64
 	Free  int64
+	Total int64
 }
 
-func (g *gangliaResourceInfo) String() string {
-	return fmt.Sprintf("%20s %4d %4d\n", g.Host, g.Free*1024/gib, g.Total*1024/gib)
+func printGangliaResources(resources []gangliaResource, headers []string) {
+	// sort resources by hostname
+	sort.Slice(resources, func(i, j int) bool {
+		return resources[i].Host < resources[j].Host
+	})
+
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 8, 20, 0, '\t', 0)
+	defer w.Flush()
+
+	headers = headers[0:4]
+	var bars []string
+	for i := 0; i < len(headers); i++ {
+		bars = append(bars, strings.Repeat("-", len(headers[i])))
+	}
+
+	fmt.Fprintf(w, "\n %s\t%s\t%s\t", headers[0], headers[1], headers[2])
+	fmt.Fprintf(w, "\n %s\t%s\t%s\t", bars[0], bars[1], bars[2])
+	for _, r := range resources {
+		fmt.Fprintf(w, "\n %s\t%d\t%d\t", r.Host, r.Free*1024/gib, r.Total*1024/gib)
+	}
 }
 
+// getGangliaResources retrieves raw data from a ganglia service endpoint, parses the raw data, and
+// turns it into a slice of the gangliaResource data objects.
+func getGangliaResources(url *url.URL) ([]gangliaResource, error) {
+
+	var resources []gangliaResource
+
+	// make HTTP GET call to the ganglia endpoint.
+	c := &http.Client{}
+	req, _ := http.NewRequest("GET", url.String(), nil)
+	resp, err := c.Do(req)
+	if err != nil {
+		return resources, err
+	}
+	if resp.StatusCode != 200 {
+		return resources, fmt.Errorf("fail get ganglia data: %s (HTTP CODE %d)", url.String(), resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	// the tabular data is enclosed by <pre></pre> tag in the returned HTML.
+	data := gangliaRawHTML{}
+	if err := pxml.Unmarshal(body, &data); err != nil {
+		return resources, fmt.Errorf("fail get ganglia data: %s", err)
+	}
+
+	log.Debugf("ganglia tabular data: %s\n", data.Pre)
+
+	// parse the tabular data
+	r := csv.NewReader(strings.NewReader(data.Pre))
+	r.Comma = '\t'
+	r.TrailingComma = true
+	r.TrimLeadingSpace = true
+	r.LazyQuotes = true
+	for {
+		o := gangliaResource{}
+		err := parseGangliaRawdata(r, &o)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Debugf("%+v\n", err)
+			continue
+		}
+		resources = append(resources, o)
+	}
+	return resources, nil
+}
+
+// parseGangliaRawdata reads one record from the csv reader, and parse the data into the given
+// data structure v.
 func parseGangliaRawdata(reader *csv.Reader, v interface{}) error {
 	record, err := reader.Read()
 	if err != nil {
