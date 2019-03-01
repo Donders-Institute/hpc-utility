@@ -24,7 +24,7 @@ func init() {
 	clusterCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd)
+	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, jobCmd, nodeCmd)
 
@@ -181,6 +181,28 @@ var nodeDiskinfoCmd = &cobra.Command{
 				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageComputeNode}
 				g.GetPrint()
 			}
+		}
+	},
+}
+
+var nodeVncCmd = &cobra.Command{
+	Use:   "vnc",
+	Short: "List vnc servers running on a given node.",
+	Long:  ``,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		c := trqhelper.TorqueHelperAccClient{
+			SrvHost:     args[0],
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+		servers, err := c.GetVNCServers()
+		if err != nil {
+			log.Errorln(err)
+			return
+		}
+		for _, s := range servers {
+			log.Infof("%s %s\n", s.Owner, s.ID)
 		}
 	},
 }
