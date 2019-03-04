@@ -50,19 +50,40 @@ func scalerIdentical(x float64) float64 {
 	return x
 }
 
+// GetAccessNodes return the hostname of torque cluster's access nodes.
+func GetAccessNodes() ([]string, error) {
+	g := GangliaDataGetter{Dataset: MemoryUsageAccessNode}
+	if err := g.Get(); err != nil {
+		return nil, err
+	}
+
+	nodes := []string{}
+	for _, r := range g.resources {
+		nodes = append(nodes, r.GetHostname())
+	}
+	return nodes, nil
+}
+
+// GetComputeNodes return the hostname of torque cluster's compute nodes.
+func GetComputeNodes() ([]string, error) {
+	g := GangliaDataGetter{Dataset: MemoryUsageComputeNode}
+	if err := g.Get(); err != nil {
+		return nil, err
+	}
+
+	nodes := []string{}
+	for _, r := range g.resources {
+		nodes = append(nodes, r.GetHostname())
+	}
+	return nodes, nil
+}
+
 // gangliaDataScaler defines data scaler for different predefined datasets.
 var gangliaDataScaler = map[gangliaDataset]func(float64) float64{
 	MemoryUsageAccessNode:  scalerMib2gib,
 	DiskUsageAccessNode:    scalerIdentical,
 	MemoryUsageComputeNode: scalerMib2gib,
 	DiskUsageComputeNode:   scalerIdentical,
-}
-
-// GangliaDataGetter provides interfaces to retrieve data from the Ganglia website, parse it
-// and return relevant data objects.
-type GangliaDataGetter struct {
-	Dataset   gangliaDataset
-	resources []gangliaResource
 }
 
 // gangliaRawHTML is a data object for unmarshaling the HTML document retrieved from ganglia.
@@ -76,10 +97,12 @@ type gangliaRawHTML struct {
 type gangliaResource interface {
 	// Compare checks whether this resource object is objectically larger than the other resource object.
 	Compare(*gangliaResource) bool
-	// WriteHeader
+	// WriteHeader prints resource specific header row to the writer.
 	WriteHeader(io.Writer) (int, error)
-	// WriteData
+	// WriteData prints resource data row to the writer.
 	WriteData(io.Writer, func(float64) float64) (int, error)
+	// GetHostname returns hostname on which this resource is refers to.
+	GetHostname() string
 }
 
 // gangliaMemdisk implements the gangliaResource interface for getting and reporting memory and disk resources.
@@ -87,6 +110,10 @@ type gangliaMemdisk struct {
 	Host  string
 	Free  float64
 	Total float64
+}
+
+func (g gangliaMemdisk) GetHostname() string {
+	return g.Host
 }
 
 func (g gangliaMemdisk) Compare(other *gangliaResource) bool {
@@ -116,6 +143,13 @@ func (g gangliaMemdisk) WriteHeader(w io.Writer) (int, error) {
 
 func (g gangliaMemdisk) WriteData(w io.Writer, scaler func(float64) float64) (int, error) {
 	return fmt.Fprintf(w, "\n %20s\t%10.1f\t%10.1f\t", g.Host, scaler(g.Free), scaler(g.Total))
+}
+
+// GangliaDataGetter provides interfaces to retrieve data from the Ganglia website, parse it
+// and return relevant data objects.
+type GangliaDataGetter struct {
+	Dataset   gangliaDataset
+	resources []gangliaResource
 }
 
 // GetPrint retrieves ganglia resource data and print the data to the stdout in a tabular format.
