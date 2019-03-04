@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"text/tabwriter"
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
@@ -276,12 +278,18 @@ var nodeVncCmd = &cobra.Command{
 
 		// simple display
 		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 4, 0, '\t', 0)
-		fmt.Fprintf(w, "\n%10s\t%24s\t", "Username", "VNC session")
-		fmt.Fprintf(w, "\n%10s\t%24s\t", "--------", "-----------")
+		w.Init(os.Stdout, 0, 4, 0, ' ', 0)
+		fmt.Fprintf(w, "\n%-10s\t%s\t", "Username", "VNC session")
+		fmt.Fprintf(w, "\n%-10s\t%s\t", "--------", "-----------")
 		for d := range vncservers {
+			// sort vncs by id
+			sort.Slice(d.vncs, func(i, j int) bool {
+				idi, _ := strconv.ParseUint(strings.Split(d.vncs[i].ID, ":")[1], 10, 32)
+				idj, _ := strconv.ParseUint(strings.Split(d.vncs[j].ID, ":")[1], 10, 32)
+				return idi < idj
+			})
 			for _, vnc := range d.vncs {
-				fmt.Fprintf(w, "\n%10s\t%24s\t", vnc.Owner, vnc.ID)
+				fmt.Fprintf(w, "\n%-10s\t%s\t", vnc.Owner, vnc.ID)
 			}
 		}
 		fmt.Fprintf(w, "\n")
