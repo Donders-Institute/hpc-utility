@@ -95,8 +95,8 @@ type gangliaRawHTML struct {
 
 // gangliaResource defines the generic interface of a ganglia resource object.
 type gangliaResource interface {
-	// Compare checks whether this resource object is objectically larger than the other resource object.
-	Compare(*gangliaResource) bool
+	// Less checks whether this resource object is objectically smaller than the other resource object.
+	Less(*gangliaResource) bool
 	// WriteHeader prints resource specific header row to the writer.
 	WriteHeader(io.Writer) (int, error)
 	// WriteData prints resource data row to the writer.
@@ -116,7 +116,7 @@ func (g gangliaMemdisk) GetHostname() string {
 	return g.Host
 }
 
-func (g gangliaMemdisk) Compare(other *gangliaResource) bool {
+func (g gangliaMemdisk) Less(other *gangliaResource) bool {
 
 	// t := reflect.TypeOf(other).Elem()
 	// if !t.ConvertibleTo(reflect.TypeOf(gangliaMemdisk{})) {
@@ -126,7 +126,7 @@ func (g gangliaMemdisk) Compare(other *gangliaResource) bool {
 
 	// TODO: check type of other!!
 	o := reflect.ValueOf(other).Elem().Elem()
-	return g.Host > o.FieldByName("Host").String()
+	return g.Host < o.FieldByName("Host").String()
 }
 
 func (g gangliaMemdisk) WriteHeader(w io.Writer) (int, error) {
@@ -214,7 +214,7 @@ func (g *GangliaDataGetter) print() {
 	// sort resources by hostname
 	sort.Slice(g.resources, func(i, j int) bool {
 		o := g.resources[j]
-		return g.resources[i].Compare(&o)
+		return g.resources[i].Less(&o)
 	})
 
 	w := new(tabwriter.Writer)
