@@ -217,11 +217,6 @@ var nodeVncCmd = &cobra.Command{
 					SrvCertFile: TorqueHelperCert,
 				}
 				for h := range nodes {
-					// h, ok := <-nodes
-					// if !ok {
-					// 	break
-					// }
-
 					log.Debugf("work on %s", h)
 
 					c.SrvHost = h
