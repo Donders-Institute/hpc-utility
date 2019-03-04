@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"sort"
-	"strings"
+	"text/tabwriter"
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
@@ -196,8 +197,14 @@ var nodeVncCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// internal data structure to hold list of vncs by host
+		type data struct {
+			host string
+			vncs []trqhelper.VNCServer
+		}
+
 		nodes := make(chan string, 2)
-		vncservers := make(chan trqhelper.VNCServer)
+		vncservers := make(chan data)
 		chanSync := make(chan byte)
 
 		// spin off two gRPC workers as go routines
@@ -207,21 +214,28 @@ var nodeVncCmd = &cobra.Command{
 					SrvPort:     TorqueHelperPort,
 					SrvCertFile: TorqueHelperCert,
 				}
-				for {
-					h, ok := <-nodes
-					if !ok {
-						break
-					}
+				for h := range nodes {
+					// h, ok := <-nodes
+					// if !ok {
+					// 	break
+					// }
+
+					log.Debugf("work on %s", h)
+
 					c.SrvHost = h
 					servers, err := c.GetVNCServers()
 					if err != nil {
 						log.Errorf("%s: %s", c.SrvHost, err)
 					}
-					for _, s := range servers {
-						vncservers <- s
-						log.Debugf("%s %s\n", s.Owner, s.ID)
+
+					vncservers <- data{
+						host: c.SrvHost,
+						vncs: servers,
 					}
 				}
+
+				log.Debugln("worker is about to leave")
+
 				chanSync <- '0'
 			}()
 		}
@@ -238,37 +252,39 @@ var nodeVncCmd = &cobra.Command{
 		}()
 
 		// filling access node hosts
-		for _, n := range args {
-			nodes <- n
-		}
-		if len(args) == 0 {
-			// TODO: append hostname of all of the access nodes.
-			accs, err := dg.GetAccessNodes()
-			if err != nil {
-				log.Errorln(err)
-			}
-			for _, n := range accs {
+		go func() {
+			// sort nodes
+			sort.Strings(args)
+			for _, n := range args {
+				log.Debug("add node %s", n)
 				nodes <- n
 			}
-		}
-		close(nodes)
-
-		// organise vncservers in map
-		vncs := make(map[string][]string)
-		owners := []string{}
-		for vnc := range vncservers {
-			if _, ok := vncs[vnc.Owner]; !ok {
-				vncs[vnc.Owner] = []string{}
-				owners = append(owners, vnc.Owner)
+			if len(args) == 0 {
+				// TODO: append hostname of all of the access nodes.
+				accs, err := dg.GetAccessNodes()
+				// sort nodes
+				sort.Strings(accs)
+				if err != nil {
+					log.Errorln(err)
+				}
+				for _, n := range accs {
+					nodes <- n
+				}
 			}
-			vncs[vnc.Owner] = append(vncs[vnc.Owner], vnc.ID)
-		}
+			close(nodes)
+		}()
 
-		// print vncs by owners
-		sort.Strings(owners)
-		for _, o := range owners {
-			sort.Strings(vncs[o])
-			fmt.Printf("%s: %s\n", o, strings.Join(vncs[o], " "))
+		// simple display
+		w := new(tabwriter.Writer)
+		w.Init(os.Stdout, 0, 4, 0, '\t', 0)
+		fmt.Fprintf(w, "\n%10s\t%24s\t", "Username", "VNC session")
+		fmt.Fprintf(w, "\n%10s\t%24s\t", "--------", "-----------")
+		for d := range vncservers {
+			for _, vnc := range d.vncs {
+				fmt.Fprintf(w, "\n%10s\t%24s\t", vnc.Owner, vnc.ID)
+			}
 		}
+		fmt.Fprintf(w, "\n")
+		w.Flush()
 	},
 }
