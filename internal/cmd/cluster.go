@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	log "github.com/sirupsen/logrus"
@@ -142,8 +146,8 @@ var nodeCmd = &cobra.Command{
 }
 
 var nodeMeminfoCmd = &cobra.Command{
-	Use:       "memfree",
-	Short:     "Print total and free memory of the cluster's access nodes.",
+	Use:       "memfree {access|compute}",
+	Short:     "Print total and free memory on the cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -164,8 +168,8 @@ var nodeMeminfoCmd = &cobra.Command{
 }
 
 var nodeDiskinfoCmd = &cobra.Command{
-	Use:       "diskfree",
-	Short:     "Print total and free disk space of the cluster's access nodes.",
+	Use:       "diskfree {access|compute}",
+	Short:     "Print total and free disk space of the cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -186,23 +190,85 @@ var nodeDiskinfoCmd = &cobra.Command{
 }
 
 var nodeVncCmd = &cobra.Command{
-	Use:   "vnc",
-	Short: "List vnc servers running on a given node.",
+	Use:   "vnc {hostname}",
+	Short: "List vnc servers by users on one of all of the cluster access nodes.",
 	Long:  ``,
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		c := trqhelper.TorqueHelperAccClient{
-			SrvHost:     args[0],
-			SrvPort:     TorqueHelperPort,
-			SrvCertFile: TorqueHelperCert,
+
+		nodes := make(chan string, 2)
+		vncservers := make(chan trqhelper.VNCServer)
+		chanSync := make(chan byte)
+
+		// spin off two gRPC workers as go routines
+		for i := 0; i < 2; i++ {
+			go func() {
+				c := trqhelper.TorqueHelperAccClient{
+					SrvPort:     TorqueHelperPort,
+					SrvCertFile: TorqueHelperCert,
+				}
+				for {
+					h, ok := <-nodes
+					if !ok {
+						break
+					}
+					c.SrvHost = h
+					servers, err := c.GetVNCServers()
+					if err != nil {
+						log.Errorf("%s: %s", c.SrvHost, err)
+					}
+					for _, s := range servers {
+						vncservers <- s
+						log.Debugf("%s %s\n", s.Owner, s.ID)
+					}
+				}
+				chanSync <- '0'
+			}()
 		}
-		servers, err := c.GetVNCServers()
-		if err != nil {
-			log.Errorln(err)
-			return
+
+		// wait for two workers to finish the gRPC calls
+		go func() {
+			i := 0
+			for i < 2 {
+				<-chanSync
+				i++
+			}
+			close(chanSync)
+			close(vncservers)
+		}()
+
+		// filling access node hosts
+		for _, n := range args {
+			nodes <- n
 		}
-		for _, s := range servers {
-			log.Infof("%s %s\n", s.Owner, s.ID)
+		if len(args) == 0 {
+			// TODO: append hostname of all of the access nodes.
+			accs, err := dg.GetAccessNodes()
+			if err != nil {
+				log.Errorln(err)
+			}
+			for _, n := range accs {
+				nodes <- n
+			}
+		}
+		close(nodes)
+
+		// organise vncservers in map
+		vncs := make(map[string][]string)
+		owners := []string{}
+		for vnc := range vncservers {
+			if _, ok := vncs[vnc.Owner]; !ok {
+				vncs[vnc.Owner] = []string{}
+				owners = append(owners, vnc.Owner)
+			}
+			vncs[vnc.Owner] = append(vncs[vnc.Owner], vnc.ID)
+		}
+
+		// print vncs by owners
+		sort.Strings(owners)
+		for _, o := range owners {
+			sort.Strings(vncs[o])
+			fmt.Printf("%s: %s\n", o, strings.Join(vncs[o], " "))
 		}
 	},
 }
