@@ -195,7 +195,7 @@ var nodeDiskinfoCmd = &cobra.Command{
 
 var nodeVncCmd = &cobra.Command{
 	Use:   "vnc {hostname}",
-	Short: "List vnc servers by users on one of all of the cluster access nodes.",
+	Short: "Print owner and display of running vnc servers on one of all of the cluster access nodes.",
 	Long:  ``,
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
