@@ -252,7 +252,12 @@ var nodeVncCmd = &cobra.Command{
 			// sort nodes
 			sort.Strings(args)
 			for _, n := range args {
-				log.Debug("add node %s", n)
+
+				if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
+					n = fmt.Sprintf("%s.%s", n, NetDomain)
+				}
+
+				log.Debugf("add node %s\n", n)
 				nodes <- n
 			}
 			if len(args) == 0 {
