@@ -270,19 +270,28 @@ var nodeVncCmd = &cobra.Command{
 			close(nodes)
 		}()
 
+		// reorganise internal data structure for sorting
+		_hosts := []string{}
+		_vncs := make(map[string][]trqhelper.VNCServer)
+		for d := range vncservers {
+			_hosts = append(_hosts, d.host)
+			_vncs[d.host] = d.vncs
+		}
+		sort.Strings(_hosts)
+
 		// simple display
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 4, 0, ' ', 0)
 		fmt.Fprintf(w, "\n%-10s\t%s\t", "Username", "VNC session")
 		fmt.Fprintf(w, "\n%-10s\t%s\t", "--------", "-----------")
-		for d := range vncservers {
-			// sort vncs by id
-			sort.Slice(d.vncs, func(i, j int) bool {
-				idi, _ := strconv.ParseUint(strings.Split(d.vncs[i].ID, ":")[1], 10, 32)
-				idj, _ := strconv.ParseUint(strings.Split(d.vncs[j].ID, ":")[1], 10, 32)
+		for _, h := range _hosts {
+			vncs := _vncs[h]
+			sort.Slice(vncs, func(i, j int) bool {
+				idi, _ := strconv.ParseUint(strings.Split(vncs[i].ID, ":")[1], 10, 32)
+				idj, _ := strconv.ParseUint(strings.Split(vncs[j].ID, ":")[1], 10, 32)
 				return idi < idj
 			})
-			for _, vnc := range d.vncs {
+			for _, vnc := range vncs {
 				fmt.Fprintf(w, "\n%-10s\t%s\t", vnc.Owner, vnc.ID)
 			}
 		}
