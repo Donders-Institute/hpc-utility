@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"text/tabwriter"
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
@@ -205,12 +206,16 @@ var nodeVncCmd = &cobra.Command{
 			vncs []trqhelper.VNCServer
 		}
 
-		nodes := make(chan string, 2)
+		nodes := make(chan string, 4)
 		vncservers := make(chan data)
-		chanSync := make(chan byte)
+
+		// worker group
+		wg := new(sync.WaitGroup)
+		nworker := 4
+		wg.Add(nworker)
 
 		// spin off two gRPC workers as go routines
-		for i := 0; i < 2; i++ {
+		for i := 0; i < nworker; i++ {
 			go func() {
 				c := trqhelper.TorqueHelperAccClient{
 					SrvPort:     TorqueHelperPort,
@@ -232,19 +237,13 @@ var nodeVncCmd = &cobra.Command{
 				}
 
 				log.Debugln("worker is about to leave")
-
-				chanSync <- '0'
+				wg.Done()
 			}()
 		}
 
-		// wait for two workers to finish the gRPC calls
+		// wait for all workers to finish
 		go func() {
-			i := 0
-			for i < 2 {
-				<-chanSync
-				i++
-			}
-			close(chanSync)
+			wg.Wait()
 			close(vncservers)
 		}()
 
