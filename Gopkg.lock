@@ -3,18 +3,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:895d90f8f31f07d3df42d5a3602bdb3c5d2013db4af3e6dc75a7c6764bbc0116"
+  digest = "1:8566039174883acd622ea7737550d50bfddfd8503908903d320375fa776a5f6a"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "2e086667dbea2f3c37fae422a9cb1c433a5c564a"
+  revision = "2fd60b21889cc553e447c7d4e7da45a823c3a8db"
 
 [[projects]]
   branch = "master"
-  digest = "1:f96e4fb5bae2f8f3ca276e0f789050f1185d658fa9d1621a4825a4faf6ca3386"
+  digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
     "internal/grpc",
@@ -22,7 +22,7 @@
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "548db520148c5c770154b2346046c4aa56a5be90"
+  revision = "d78ac109a09275fae2b2870d835454c477c8a65e"
 
 [[projects]]
   digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
@@ -129,11 +129,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "92fc7df08ae7536330f5a21328292abfa70520a8"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
 
 [[projects]]
   branch = "master"
-  digest = "1:1cecc41d51d8c61ed4840b7aa831a6bf1750b2a7a75eb5c75c593e79552c87de"
+  digest = "1:eb36982383b8b0e4722c76e6a692af2f8fa8e5810dacbc19b795307c974fe1de"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -141,7 +141,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a34e9553db1e492c9a76e60db2296ae7e5fbb772"
+  revision = "b294cbcfc56d2a65a30c02c78722b5df061e99b8"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -172,7 +172,7 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "4f5b463f9597cbe0dd13a6a2cd4f85e788d27508"
+  revision = "6e86cb5d2f12401bdd82a5eccbd701b5a697e63e"
 
 [[projects]]
   digest = "1:cbc746de4662c66fd24a037501bd65aa0f8ad0bfca0c92576e0abb88864e3741"
