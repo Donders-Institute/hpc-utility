@@ -19,7 +19,7 @@ var defQaasCert string
 func init() {
 
 	qaasCmd.PersistentFlags().StringVarP(&qaasHost, "server", "s", "qaas.dccn.nl", "QaaS service hostname")
-	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 5111, "QaaS service hostname")
+	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 443, "QaaS service hostname")
 	qaasCmd.PersistentFlags().StringVarP(&qaasCertFile, "cert", "c", defQaasCert, "QaaS service SSL certificate")
 
 	createCmd.Flags().StringVarP(&webhookName, "name", "n", "MyHook", "name of the webhook")
