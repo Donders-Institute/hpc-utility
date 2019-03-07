@@ -1,6 +1,14 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"text/tabwriter"
+
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	log "github.com/sirupsen/logrus"
@@ -142,8 +150,8 @@ var nodeCmd = &cobra.Command{
 }
 
 var nodeMeminfoCmd = &cobra.Command{
-	Use:       "memfree",
-	Short:     "Print total and free memory of the cluster's access nodes.",
+	Use:       "memfree {access|compute}",
+	Short:     "Print total and free memory on the cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -164,8 +172,8 @@ var nodeMeminfoCmd = &cobra.Command{
 }
 
 var nodeDiskinfoCmd = &cobra.Command{
-	Use:       "diskfree",
-	Short:     "Print total and free disk space of the cluster's access nodes.",
+	Use:       "diskfree {access|compute}",
+	Short:     "Print total and free disk space of the cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -186,23 +194,113 @@ var nodeDiskinfoCmd = &cobra.Command{
 }
 
 var nodeVncCmd = &cobra.Command{
-	Use:   "vnc",
-	Short: "List vnc servers running on a given node.",
+	Use:   "vnc {hostname}",
+	Short: "Print owner and display of running vnc servers on one of all of the cluster access nodes.",
 	Long:  ``,
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		c := trqhelper.TorqueHelperAccClient{
-			SrvHost:     args[0],
-			SrvPort:     TorqueHelperPort,
-			SrvCertFile: TorqueHelperCert,
+
+		// internal data structure to hold list of vncs by host
+		type data struct {
+			host string
+			vncs []trqhelper.VNCServer
 		}
-		servers, err := c.GetVNCServers()
-		if err != nil {
-			log.Errorln(err)
-			return
+
+		nodes := make(chan string, 4)
+		vncservers := make(chan data)
+
+		// worker group
+		wg := new(sync.WaitGroup)
+		nworker := 4
+		wg.Add(nworker)
+
+		// spin off two gRPC workers as go routines
+		for i := 0; i < nworker; i++ {
+			go func() {
+				c := trqhelper.TorqueHelperAccClient{
+					SrvPort:     TorqueHelperPort,
+					SrvCertFile: TorqueHelperCert,
+				}
+				for h := range nodes {
+					log.Debugf("work on %s", h)
+
+					c.SrvHost = h
+					servers, err := c.GetVNCServers()
+					if err != nil {
+						log.Errorf("%s: %s", c.SrvHost, err)
+					}
+
+					vncservers <- data{
+						host: c.SrvHost,
+						vncs: servers,
+					}
+				}
+
+				log.Debugln("worker is about to leave")
+				wg.Done()
+			}()
 		}
-		for _, s := range servers {
-			log.Infof("%s %s\n", s.Owner, s.ID)
+
+		// wait for all workers to finish
+		go func() {
+			wg.Wait()
+			close(vncservers)
+		}()
+
+		// filling access node hosts
+		go func() {
+			// sort nodes
+			sort.Strings(args)
+			for _, n := range args {
+
+				if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
+					n = fmt.Sprintf("%s.%s", n, NetDomain)
+				}
+
+				log.Debugf("add node %s\n", n)
+				nodes <- n
+			}
+			if len(args) == 0 {
+				// TODO: append hostname of all of the access nodes.
+				accs, err := dg.GetAccessNodes()
+				// sort nodes
+				sort.Strings(accs)
+				if err != nil {
+					log.Errorln(err)
+				}
+				for _, n := range accs {
+					nodes <- n
+				}
+			}
+			close(nodes)
+		}()
+
+		// reorganise internal data structure for sorting
+		_hosts := []string{}
+		_vncs := make(map[string][]trqhelper.VNCServer)
+		for d := range vncservers {
+			_hosts = append(_hosts, d.host)
+			_vncs[d.host] = d.vncs
 		}
+		sort.Strings(_hosts)
+
+		// simple display
+		w := new(tabwriter.Writer)
+		w.Init(os.Stdout, 0, 4, 0, ' ', 0)
+		fmt.Fprintf(w, "\n%-10s\t%s\t", "Username", "VNC session")
+		fmt.Fprintf(w, "\n%-10s\t%s\t", "--------", "-----------")
+		for _, h := range _hosts {
+			vncs := _vncs[h]
+			sort.Slice(vncs, func(i, j int) bool {
+				idi, _ := strconv.ParseUint(strings.Split(vncs[i].ID, ":")[1], 10, 32)
+				idj, _ := strconv.ParseUint(strings.Split(vncs[j].ID, ":")[1], 10, 32)
+				return idi < idj
+			})
+			for _, vnc := range vncs {
+				fmt.Fprintf(w, "\n%-10s\t%s\t", vnc.Owner, vnc.ID)
+			}
+		}
+		fmt.Fprintf(w, "\n")
+		w.Flush()
 	},
 }

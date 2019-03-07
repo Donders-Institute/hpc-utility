@@ -19,6 +19,10 @@ var TorqueHelperPort int
 // TorqueHelperCert is the path of the TorqueHelper server certificate.
 var TorqueHelperCert string
 
+// NetDomain is the default network domain name.
+// It allows commands to accept short hostname specification in arguments.
+var NetDomain string
+
 // NewHpcutilCmd returns the root command.
 func NewHpcutilCmd() *cobra.Command {
 	return rootCmd
@@ -26,6 +30,7 @@ func NewHpcutilCmd() *cobra.Command {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().StringVarP(&NetDomain, "domain", "d", "dccn.nl", "default network domain")
 }
 
 var rootCmd = &cobra.Command{
