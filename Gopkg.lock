@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8566039174883acd622ea7737550d50bfddfd8503908903d320375fa776a5f6a"
+  digest = "1:511f11b8d5bf1080593d92d350a03bb7e589eae8cbd91136ad8d688597dfda0c"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "2fd60b21889cc553e447c7d4e7da45a823c3a8db"
+  revision = "652678b977269face7a01a21cb129afbec8ffe07"
 
 [[projects]]
   digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
