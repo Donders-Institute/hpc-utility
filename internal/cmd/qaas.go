@@ -45,7 +45,7 @@ var createCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.Webhook{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		url, err := webhook.New(args[0])
 		if err != nil {
 			log.Errorf("fail creating new webhook: %+v\n", err)
@@ -61,14 +61,14 @@ var listCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.Webhook{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		ws, err := webhook.List()
 		if err != nil {
 			log.Errorf("fail retriving list of webhooks: %+v\n", err)
 			return
 		}
 		for w := range ws {
-			log.Infof("- %+v\n", w)
+			log.Infof("%+v\n", w)
 		}
 	},
 }
@@ -79,7 +79,14 @@ var deleteCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Warnf("Not implemented!!")
+		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		for _, id := range args {
+			if err := webhook.Delete(id, true); err != nil {
+				log.Errorln(err)
+				continue
+			}
+			log.Infof("Webhook %s deleted.\n", id)
+		}
 	},
 }
 
@@ -89,7 +96,15 @@ var infoCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Warnf("Not implemented!!")
+		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		for _, id := range args {
+			if info, err := webhook.GetInfo(id); err != nil {
+				log.Errorln(err)
+				continue
+			} else {
+				log.Infof("%+v\n", info)
+			}
+		}
 	},
 }
 
