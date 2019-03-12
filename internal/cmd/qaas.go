@@ -68,7 +68,7 @@ var listCmd = &cobra.Command{
 			return
 		}
 		for w := range ws {
-			log.Infof("%+v\n", w)
+			printWebhookConfigInfo(w)
 		}
 	},
 }
@@ -102,7 +102,7 @@ var infoCmd = &cobra.Command{
 				log.Errorln(err)
 				continue
 			} else {
-				log.Infof("%+v\n", info)
+				printWebhookConfigInfo(info)
 			}
 		}
 	},
@@ -116,4 +116,15 @@ var triggerCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Warnf("Not implemented!!")
 	},
+}
+
+// printWebhookConfigInfo writes one or multiple WebhookConfigInfo data objects to the stdout.
+func printWebhookConfigInfo(infoList ...qaas.WebhookConfigInfo) {
+	for _, info := range infoList {
+		fmt.Printf("\n%-s", info.ID)
+		fmt.Printf("\n\t%-16s:%-s", "Description", info.Description)
+		fmt.Printf("\n\t%-16s:%-s", "Creation time", info.CreationTime)
+		fmt.Printf("\n\t%-16s:%-s", "Webhook URL", info.WebhookURL)
+		fmt.Println()
+	}
 }
