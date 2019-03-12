@@ -28,6 +28,31 @@ func NewHpcutilCmd() *cobra.Command {
 	return rootCmd
 }
 
+// customized bash completion function for searching for webhook ids in the user's home directory.
+const (
+	funcBashCompletion = `__hpcutil_get_webhook_ids()
+{
+	local hpcutil_webhook_ids out
+    if hpcutil_webhook_ids=$(find $HOME/.qaas -maxdepth 1 ! -path $HOME/.qaas -type d -print 2>/dev/null); then
+        out=( $(echo "${hpcutil_webhook_ids}" | awk -F '.qaas/' {'print $2'}) )
+        COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
+	fi
+	return 0
+}
+
+__custom_func() {
+	case ${last_command} in 
+		hpcutil_webhook_info | hpcutil_webhook_delete)
+			__hpcutil_get_webhook_ids
+			return
+			;;
+		*)
+			;;
+	esac
+}
+`
+)
+
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringVarP(&NetDomain, "domain", "d", "dccn.nl", "default network domain")
@@ -42,6 +67,7 @@ var rootCmd = &cobra.Command{
 			log.SetLevel(log.DebugLevel)
 		}
 	},
+	BashCompletionFunction: funcBashCompletion,
 }
 
 // Execute is the main entry point of the cluster command.
