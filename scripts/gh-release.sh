@@ -42,7 +42,7 @@ function new_release_post_data() {
 EOF
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 2 ]; then
     echo "$0 <release_tag> <is_prerelease>"
     exit 1
 fi
