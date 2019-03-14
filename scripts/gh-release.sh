@@ -83,6 +83,7 @@ fi
 while [ "$gh_name" == "" ]; do
     read -s -p "github username: " gh_name
 done
+echo
 
 while [ "$gh_pass" == "" ]; do
     read -s -p "github password (${gh_name}): " gh_pass
@@ -100,7 +101,7 @@ fi
 rid=$id
 
 mydir=$( get_script_dir $0 )
-path_spec=${mydir}/build/rpm/centos7.spec
+path_spec=${mydir}/../build/rpm/centos7.spec
 
 ## replace the release version in
 out=$( VERSION=${tag} rpmbuild --undefine=_disable_source_fetch -bb ${path_spec} )
