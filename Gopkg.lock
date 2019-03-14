@@ -2,15 +2,15 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:27edcfdae3d71bc389c6b4b8e875b84f165c3fd1046051559660223a28f8bff3"
+  digest = "1:1dbb3e704937ed0a748db964867a6de3d20cbff1187fa62ba676f53c06bd0e2f"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "927e8544d7e83774dc5ba0acaab3a295e567b50e"
+  revision = "7c1510eb010636e5dc327069ca40c8657e1ad685"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
@@ -113,7 +113,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "c2843e01d9a2bc60bb26ad24e09734fdc2d9ec58"
+  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
 
 [[projects]]
   branch = "master"
@@ -129,7 +129,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "d8887717615a059821345a5c23649351b52a1c0b"
+  revision = "9f648a60d9775ef5c977e7669d1673a7a67bef33"
 
 [[projects]]
   branch = "master"
