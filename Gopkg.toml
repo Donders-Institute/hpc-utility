@@ -26,12 +26,12 @@
 
 
 [[constraint]]
+  branch = "master"
   name = "github.com/Donders-Institute/hpc-qaas"
-  version = "0.2.1"
 
 [[constraint]]
+  branch = "master"
   name = "github.com/Donders-Institute/hpc-torque-helper"
-  version = "1.1.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

@@ -2,17 +2,18 @@
 
 
 [[projects]]
-  digest = "1:1dbb3e704937ed0a748db964867a6de3d20cbff1187fa62ba676f53c06bd0e2f"
+  branch = "master"
+  digest = "1:db5f13cd1781cbda2c8da019ace7a6c0edc7da011b45f106c7f9f152c2613416"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "7c1510eb010636e5dc327069ca40c8657e1ad685"
-  version = "v0.2.1"
+  revision = "32fc7069cf76c1baffa43de58f3489e3a2400165"
 
 [[projects]]
+  branch = "master"
   digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
@@ -22,7 +23,6 @@
   ]
   pruneopts = "UT"
   revision = "d78ac109a09275fae2b2870d835454c477c8a65e"
-  version = "1.1.0"
 
 [[projects]]
   digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
