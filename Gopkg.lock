@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:db5f13cd1781cbda2c8da019ace7a6c0edc7da011b45f106c7f9f152c2613416"
+  digest = "1:4e09cf190723681150bc066857909ca00e9b8179ecb7f23ea5d0d446bd4704e0"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "32fc7069cf76c1baffa43de58f3489e3a2400165"
+  revision = "3d4eab5f42070beb296f17e95dfeccea31a1480d"
 
 [[projects]]
   branch = "master"
@@ -36,8 +36,8 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
-  version = "v1.3.0"
+  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
+  version = "v1.3.1"
 
 [[projects]]
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
@@ -133,7 +133,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:426092407910bee4a539be5d377abbaf629bae216c8eb2f80409c8cbe2647508"
+  digest = "1:450becdbf6739398b40a71ea3416b67c74547e808849dbbd85f01a3b98e42417"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -141,7 +141,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "fead79001313d15903fb4605b4a1b781532cd93e"
+  revision = "a2f829d7f35f2ed1c3520c553a6226495455cae0"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
