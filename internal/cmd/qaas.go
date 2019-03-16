@@ -89,7 +89,7 @@ var deleteCmd = &cobra.Command{
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		for _, id := range args {
 			if err := webhook.Delete(id, true); err != nil {
-				log.Errorln(err)
+				log.Errorf("%s: %s\n", err, id)
 				continue
 			}
 			log.Infof("Webhook %s deleted.\n", id)
@@ -106,7 +106,7 @@ var infoCmd = &cobra.Command{
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		for _, id := range args {
 			if info, err := webhook.GetInfo(id); err != nil {
-				log.Errorln(err)
+				log.Errorf("%s: %s\n", err, id)
 				continue
 			} else {
 				printWebhookConfigInfo(info)
