@@ -27,7 +27,7 @@ func init() {
 	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 443, "QaaS service hostname")
 	qaasCmd.PersistentFlags().StringVarP(&qaasCertFile, "cert", "c", defQaasCert, "QaaS service SSL certificate")
 
-	createCmd.Flags().StringVarP(&webhookName, "name", "n", "MyHook", "name of the webhook")
+	createCmd.Flags().StringVarP(&webhookName, "name", "n", "", "name or a short description of the webhook")
 	triggerCmd.Flags().StringVarP(&webhookPayload, "payload", "l", "", "file containing the webhook payload data")
 	triggerCmd.Flags().StringVarP(&webhookPayloadType, "type", "t", "json", "webhook payload data type (json, xml or txt)")
 
@@ -53,7 +53,7 @@ var createCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
-		url, err := webhook.New(args[0])
+		url, err := webhook.New(args[0], webhookName)
 		if err != nil {
 			log.Errorf("fail creating new webhook: %+v\n", err)
 			return
