@@ -42,7 +42,7 @@ const (
 
 __custom_func() {
 	case ${last_command} in 
-		hpcutil_webhook_info | hpcutil_webhook_delete)
+		hpcutil_webhook_info | hpcutil_webhook_delete | hpcutil_webhook_trigger )
 			__hpcutil_get_webhook_ids
 			return
 			;;
