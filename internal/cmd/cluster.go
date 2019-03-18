@@ -150,15 +150,18 @@ var matlabCmd = &cobra.Command{
 			if len(lic.Usages) == 0 {
 				continue
 			}
-			fmt.Printf("\n%-32s: %4d of %4d in use", lic.Package, len(lic.Usages), lic.Total)
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"User", "Host", "Version", "Since"})
+			cntLocal := 0
 			for _, usage := range lic.Usages {
 				// TODO: use a better way to filter and present local usage
 				if strings.HasSuffix(strings.ToLower(usage.Host), "dccn.nl") || strings.HasPrefix(strings.ToLower(usage.Host), "dccn") {
 					table.Append([]string{usage.User, usage.Host, usage.Version, usage.Since})
+					cntLocal++
 				}
 			}
+
+			fmt.Printf("\n%-32s: %4d of %4d in use (%d by DCCN)\n", lic.Package, len(lic.Usages), lic.Total, cntLocal)
 			table.Render()
 		}
 	},
