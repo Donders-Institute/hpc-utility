@@ -1,12 +1,17 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"text/tabwriter"
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
@@ -34,7 +39,7 @@ func init() {
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
-	clusterCmd.AddCommand(qstatCmd, configCmd, jobCmd, nodeCmd)
+	clusterCmd.AddCommand(qstatCmd, configCmd, matlabCmd, jobCmd, nodeCmd)
 
 	rootCmd.AddCommand(clusterCmd)
 }
@@ -81,6 +86,63 @@ var configCmd = &cobra.Command{
 		}
 		if err := c.PrintClusterConfig(); err != nil {
 			log.Errorf("%+v\n", err)
+		}
+	},
+}
+
+var matlabCmd = &cobra.Command{
+	Use:   "matlablic",
+	Short: "Print a summary of the Matlab license usage.",
+	Long:  ``,
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		stdout, stderr, ec, err := execCmd("lmstat", []string{"-a"})
+		if err != nil {
+			log.Fatalf("%s: exit code %d\n", err, ec)
+		}
+		if ec != 0 {
+			log.Fatal(stderr.String())
+		}
+
+		rePkg := regexp.MustCompile(`^Users of (\S+):  \(Total of (\d+) licenses issued;  Total of (\d+) licenses in use\)$`)
+		reUse := regexp.MustCompile(`^\s+(\S+) (\S+).*\((v[0-9]+)\).*, start (.*)$`)
+
+		var lic matlabLicense
+		var lics []matlabLicense
+		for {
+			line, err := stdout.ReadString('\n')
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalln("fail parsing lmstat data")
+			}
+
+			if d := rePkg.FindAllStringSubmatch(line, -1); d != nil {
+
+				// new license package found, put current lic into lics if the current lic is not nil
+				if lic.Package != "" {
+					lics = append(lics, lic)
+				}
+
+				// create a new matlabLicense with the parsed data
+				n := d[0][1]
+				t, _ := strconv.Atoi(d[0][2])
+				lic = matlabLicense{Package: n, Total: t}
+
+				continue
+			}
+
+			if d := reUse.FindAllStringSubmatch(line, -1); d != nil {
+				// new license usage found, parse it and add it to the license package's usage attribute.
+				usage := matlabLicenseUsageInfo{User: d[0][1], Host: d[0][2], Version: d[0][3], Since: d[0][4]}
+				lic.Usages = append(lic.Usages, usage)
+				continue
+			}
+		}
+		// print licenses
+		for _, lic := range lics {
+			fmt.Printf("\n%-24s %4d of %4d in use", lic.Package, len(lic.Usages), lic.Total)
 		}
 	},
 }
@@ -303,4 +365,39 @@ var nodeVncCmd = &cobra.Command{
 		fmt.Fprintf(w, "\n")
 		w.Flush()
 	},
+}
+
+// execCmd executes a system call and returns stdout, stderr and exit code of the execution.
+func execCmd(cmdName string, cmdArgs []string) (stdout, stderr bytes.Buffer, ec int32, err error) {
+	// Execute command and catch the stdout and stderr as byte buffer.
+	cmd := exec.Command(cmdName, cmdArgs...)
+	cmd.Env = os.Environ()
+	cmd.Stderr = &stderr
+	cmd.Stdout = &stdout
+	ec = 0
+	if err = cmd.Run(); err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			ws := exitError.Sys().(syscall.WaitStatus)
+			ec = int32(ws.ExitStatus())
+		} else {
+			ec = 1
+		}
+	}
+	return
+}
+
+// matlabLicense defines data structure of matlab license information and usage parsed from the
+// `lmstat -a` command.
+type matlabLicense struct {
+	Package string
+	Total   int
+	Usages  []matlabLicenseUsageInfo
+}
+
+// matlabLicenseUsageInfo defines data structure of a matlab license that is in use.
+type matlabLicenseUsageInfo struct {
+	User    string
+	Host    string
+	Version string
+	Since   string
 }
