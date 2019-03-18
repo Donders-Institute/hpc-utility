@@ -146,6 +146,7 @@ var matlabCmd = &cobra.Command{
 			}
 		}
 		// print license usages
+		var summaries []string
 		for _, lic := range lics {
 			if len(lic.Usages) == 0 {
 				continue
@@ -161,8 +162,17 @@ var matlabCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Printf("\npackage %s: %d of %d in use (%d by DCCN)\n", lic.Package, len(lic.Usages), lic.Total, cntLocal)
-			table.Render()
+			if cntLocal > 0 {
+				s := fmt.Sprintf("package %s: %d of %d in use (%d by DCCN users)", lic.Package, len(lic.Usages), lic.Total, cntLocal)
+				summaries = append(summaries, s)
+				fmt.Fprintf(os.Stdout, "\n%s\n", s)
+				table.Render()
+			}
+		}
+		// print summary
+		fmt.Fprintf(os.Stdout, "Summary:\n")
+		for _, s := range summaries {
+			fmt.Fprintf(os.Stdout, "%s\n", s)
 		}
 	},
 }
