@@ -144,10 +144,18 @@ var matlabCmd = &cobra.Command{
 				continue
 			}
 		}
-		// print licenses
+		// print license usages
 		for _, lic := range lics {
-			fmt.Printf("\n%-24s %4d of %4d in use", lic.Package, len(lic.Usages), lic.Total)
+			fmt.Printf("\n%-32s: %4d of %4d in use", lic.Package, len(lic.Usages), lic.Total)
+			fmt.Printf("\n===============================================================")
+			for _, usage := range lic.Usages {
+				// TODO: use a better way to filter and present local usage
+				if strings.HasSuffix(strings.ToLower(usage.Host), "dccn.nl") || strings.HasPrefix(strings.ToLower(usage.Host), "dccn") {
+					fmt.Printf("\n\t%-10s %-32s (%-3s) since %s", usage.User, usage.Host, usage.Version, usage.Since)
+				}
+			}
 		}
+		fmt.Printf("\n")
 	},
 }
 
