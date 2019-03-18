@@ -118,7 +118,7 @@ var matlabCmd = &cobra.Command{
 				log.Fatalln("fail parsing lmstat data")
 			}
 
-			log.Debugf("%s\n", line)
+			line = strings.TrimSuffix(line, "\n")
 			if d := rePkg.FindAllStringSubmatch(line, -1); d != nil {
 
 				log.Debugf("find license package: %s\n", line)
