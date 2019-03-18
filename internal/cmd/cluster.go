@@ -161,7 +161,7 @@ var matlabCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Printf("\n%-32s: %4d of %4d in use (%d by DCCN)\n", lic.Package, len(lic.Usages), lic.Total, cntLocal)
+			fmt.Printf("\npackage %s: %d of %d in use (%d by DCCN)\n", lic.Package, len(lic.Usages), lic.Total, cntLocal)
 			table.Render()
 		}
 	},
