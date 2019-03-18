@@ -163,7 +163,7 @@ var matlabCmd = &cobra.Command{
 			}
 
 			if cntLocal > 0 {
-				s := fmt.Sprintf("package %s: %d of %d in use (%d by DCCN users)", lic.Package, len(lic.Usages), lic.Total, cntLocal)
+				s := fmt.Sprintf("package %s: %d of %d in use (%d by dccn users)", lic.Package, len(lic.Usages), lic.Total, cntLocal)
 				summaries = append(summaries, s)
 				fmt.Fprintf(os.Stdout, "\n%s\n", s)
 				table.Render()
