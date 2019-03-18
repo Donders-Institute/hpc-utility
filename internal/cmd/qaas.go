@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	qaas "github.com/Donders-Institute/hpc-qaas/pkg/client"
 	log "github.com/sirupsen/logrus"
@@ -12,6 +15,8 @@ var qaasHost string
 var qaasPort int
 var qaasCertFile string
 var webhookName string
+var webhookPayload string
+var webhookPayloadType string
 
 // variable may be set at the build time to fix the default location for the QaaS server certificate.
 var defQaasCert string
@@ -22,7 +27,9 @@ func init() {
 	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 443, "QaaS service hostname")
 	qaasCmd.PersistentFlags().StringVarP(&qaasCertFile, "cert", "c", defQaasCert, "QaaS service SSL certificate")
 
-	createCmd.Flags().StringVarP(&webhookName, "name", "n", "MyHook", "name of the webhook")
+	createCmd.Flags().StringVarP(&webhookName, "name", "n", "", "name or a short description of the webhook")
+	triggerCmd.Flags().StringVarP(&webhookPayload, "payload", "l", "", "file containing the webhook payload data")
+	triggerCmd.Flags().StringVarP(&webhookPayloadType, "type", "t", "json", "webhook payload data type (json, xml or txt)")
 
 	qaasCmd.AddCommand(createCmd, deleteCmd, infoCmd, triggerCmd, listCmd)
 	rootCmd.AddCommand(qaasCmd)
@@ -46,7 +53,7 @@ var createCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
-		url, err := webhook.New(args[0])
+		url, err := webhook.New(args[0], webhookName)
 		if err != nil {
 			log.Errorf("fail creating new webhook: %+v\n", err)
 			return
@@ -74,7 +81,7 @@ var listCmd = &cobra.Command{
 }
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete [name]",
+	Use:   "delete [id]",
 	Short: "Delete an existing webhook.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -82,7 +89,7 @@ var deleteCmd = &cobra.Command{
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		for _, id := range args {
 			if err := webhook.Delete(id, true); err != nil {
-				log.Errorln(err)
+				log.Errorf("%s: %s\n", err, id)
 				continue
 			}
 			log.Infof("Webhook %s deleted.\n", id)
@@ -91,7 +98,7 @@ var deleteCmd = &cobra.Command{
 }
 
 var infoCmd = &cobra.Command{
-	Use:   "info [name]",
+	Use:   "info [id]",
 	Short: "Retrieve information of an existing webhook.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -99,7 +106,7 @@ var infoCmd = &cobra.Command{
 		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
 		for _, id := range args {
 			if info, err := webhook.GetInfo(id); err != nil {
-				log.Errorln(err)
+				log.Errorf("%s: %s\n", err, id)
 				continue
 			} else {
 				printWebhookConfigInfo(info)
@@ -109,12 +116,56 @@ var infoCmd = &cobra.Command{
 }
 
 var triggerCmd = &cobra.Command{
-	Use:   "trigger [name]",
-	Short: "Trigger an existing webhook manually.",
+	Use:   "trigger [id]",
+	Short: "Trigger webhook manually with a payload.",
 	Long:  ``,
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Warnf("Not implemented!!")
+
+		var dataPayload []byte
+
+		// when payload is specified, check existence of it.
+		if webhookPayload != "" {
+			payloadAbs, err := filepath.Abs(webhookPayload)
+			log.Fatalln(err)
+
+			fi, err := os.Lstat(payloadAbs)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if !fi.Mode().IsRegular() {
+				log.Fatalln("not a regular file: %s\n", payloadAbs)
+			}
+			dataPayload, err = ioutil.ReadFile(payloadAbs)
+			if err != nil {
+				log.Fatalln(err)
+			}
+		}
+
+		// get webhook info
+		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		info, err := webhook.GetInfo(args[0])
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		// map webhookPayloadType to request body content type
+		// TODO: use a better approach (e.g. the mime package) with integration with bash completion.
+		reqBodyType := "application/json"
+		switch webhookPayloadType {
+		case "xml":
+			reqBodyType = "text/xml"
+		case "txt":
+			reqBodyType = "text/plain"
+		default:
+		}
+
+		// make a POST call to the Webhook's URL with the content of payload as request body
+		rspData, err := info.TriggerWebhook(dataPayload, reqBodyType, qaasCertFile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Infof("webhook %s triggerd: %s\n", info.WebhookURL, string(rspData))
 	},
 }
 
