@@ -120,6 +120,8 @@ var matlabCmd = &cobra.Command{
 
 			if d := rePkg.FindAllStringSubmatch(line, -1); d != nil {
 
+				log.Debugf("find license package: %s\n", line)
+
 				// new license package found, put current lic into lics if the current lic is not nil
 				if lic.Package != "" {
 					lics = append(lics, lic)
@@ -134,6 +136,7 @@ var matlabCmd = &cobra.Command{
 			}
 
 			if d := reUse.FindAllStringSubmatch(line, -1); d != nil {
+				log.Debugf("find package usage: %s\n", line)
 				// new license usage found, parse it and add it to the license package's usage attribute.
 				usage := matlabLicenseUsageInfo{User: d[0][1], Host: d[0][2], Version: d[0][3], Since: d[0][4]}
 				lic.Usages = append(lic.Usages, usage)
