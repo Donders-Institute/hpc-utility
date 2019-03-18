@@ -16,6 +16,7 @@ import (
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
+	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -146,16 +147,20 @@ var matlabCmd = &cobra.Command{
 		}
 		// print license usages
 		for _, lic := range lics {
+			if len(lic.Usages) == 0 {
+				continue
+			}
 			fmt.Printf("\n%-32s: %4d of %4d in use", lic.Package, len(lic.Usages), lic.Total)
-			fmt.Printf("\n===============================================================")
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"User", "Host", "Version", "Since"})
 			for _, usage := range lic.Usages {
 				// TODO: use a better way to filter and present local usage
 				if strings.HasSuffix(strings.ToLower(usage.Host), "dccn.nl") || strings.HasPrefix(strings.ToLower(usage.Host), "dccn") {
-					fmt.Printf("\n\t%-10s %-32s (%-3s) since %s", usage.User, usage.Host, usage.Version, usage.Since)
+					table.Append([]string{usage.User, usage.Host, usage.Version, usage.Since})
 				}
 			}
+			table.Render()
 		}
-		fmt.Printf("\n")
 	},
 }
 

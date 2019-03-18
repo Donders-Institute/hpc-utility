@@ -3,14 +3,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0cd57760b1aad225aca200c04d7217e3bfa40a8c7b13785c4825598a95206162"
+  digest = "1:92173991d7ae5c2f7773ad314f7cdd3bff465cd0a71acbad2c0bd7db3a6d1a71"
   name = "github.com/Donders-Institute/hpc-qaas"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "c9285264bbadb48536d1d95da4f30f18b256f123"
+  revision = "2be195dff27796382b2d738a660d57afd4f843b3"
 
 [[projects]]
   branch = "master"
@@ -73,6 +73,22 @@
   pruneopts = "UT"
   revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
+  digest = "1:abcdbf03ca6ca13d3697e2186edc1f33863bbdac2b3a44dfa39015e8903f7409"
+  name = "github.com/olekukonko/tablewriter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e6d60cf7ba1f42d86d54cdf5508611c4aafb3970"
+  version = "v0.0.1"
 
 [[projects]]
   digest = "1:e4c72127d910a96daf869a44f3dd563b86dbe6931a172863a0e99c5ff04b59e4"
@@ -220,6 +236,7 @@
   input-imports = [
     "github.com/Donders-Institute/hpc-qaas/pkg/client",
     "github.com/Donders-Institute/hpc-torque-helper/pkg/client",
+    "github.com/olekukonko/tablewriter",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
   ]
