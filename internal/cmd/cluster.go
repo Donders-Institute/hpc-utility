@@ -38,7 +38,7 @@ func init() {
 	clusterCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
 
-	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "Group VNCs by user.")
+	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -289,9 +289,13 @@ var nodeDiskinfoCmd = &cobra.Command{
 
 var nodeVncCmd = &cobra.Command{
 	Use:   "vnc {hostname}",
-	Short: "Print owner and display of running vnc servers on one of all of the cluster access nodes.",
-	Long:  ``,
-	Args:  cobra.MaximumNArgs(1),
+	Short: "Print list of VNC servers on the cluster or a specific node.",
+	Long: `Print list of VNC servers on the cluster or a specific node.
+
+If the {hostname} is specified, only the VNCs on the node will be shown.
+
+When the username is specified by the "-u" option, only the VNCs owned by the user will be shown.`,
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		nodes := make(chan string, 4)
