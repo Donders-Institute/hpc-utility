@@ -28,7 +28,7 @@ const (
 
 // variable may be set at the build time to fix the default location for the TorqueHelper server certificate.
 var defTorqueHelperCert string
-var groupVncByUser bool
+var vncUser string
 
 func init() {
 
@@ -38,7 +38,7 @@ func init() {
 	clusterCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
 
-	nodeVncCmd.Flags().BoolVarP(&groupVncByUser, "user", "u", false, "Group VNCs by user.")
+	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "Group VNCs by user.")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -319,7 +319,9 @@ var nodeVncCmd = &cobra.Command{
 					}
 
 					for _, s := range servers {
-						vncservers <- s
+						if vncUser == "" || s.Owner == vncUser {
+							vncservers <- s
+						}
 					}
 				}
 
@@ -371,31 +373,24 @@ var nodeVncCmd = &cobra.Command{
 		// sort _vncs and make tabluar display on stdout
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Username", "VNC session"})
-		if groupVncByUser {
-			sort.Slice(_vncs, func(i, j int) bool {
-				return _vncs[i].Owner < _vncs[j].Owner
-			})
-			table.SetAutoMergeCells(true)
-			table.SetRowLine(true)
-		} else {
-			sort.Slice(_vncs, func(i, j int) bool {
 
-				datai := strings.Split(_vncs[i].ID, ":")
-				dataj := strings.Split(_vncs[j].ID, ":")
+		sort.Slice(_vncs, func(i, j int) bool {
 
-				hosti := datai[0]
-				hostj := dataj[0]
+			datai := strings.Split(_vncs[i].ID, ":")
+			dataj := strings.Split(_vncs[j].ID, ":")
 
-				if hosti != hostj {
-					return hosti < hostj
-				}
+			hosti := datai[0]
+			hostj := dataj[0]
 
-				idi, _ := strconv.ParseUint(datai[1], 10, 32)
-				idj, _ := strconv.ParseUint(dataj[1], 10, 32)
+			if hosti != hostj {
+				return hosti < hostj
+			}
 
-				return idi < idj
-			})
-		}
+			idi, _ := strconv.ParseUint(datai[1], 10, 32)
+			idj, _ := strconv.ParseUint(dataj[1], 10, 32)
+
+			return idi < idj
+		})
 
 		for _, vnc := range _vncs {
 			table.Append([]string{vnc.Owner, vnc.ID})
