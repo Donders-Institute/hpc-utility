@@ -28,6 +28,7 @@ const (
 
 // variable may be set at the build time to fix the default location for the TorqueHelper server certificate.
 var defTorqueHelperCert string
+var groupVncByUser bool
 
 func init() {
 
@@ -36,6 +37,8 @@ func init() {
 	clusterCmd.PersistentFlags().StringVarP(&TorqueServerHost, "server", "s", "torque.dccn.nl", "Torque server hostname")
 	clusterCmd.PersistentFlags().IntVarP(&TorqueHelperPort, "port", "p", 60209, "Torque helper service port")
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
+
+	nodeVncCmd.Flags().BoolVarP(&groupVncByUser, "user", "u", false, "Group VNCs by user.")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -291,14 +294,8 @@ var nodeVncCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// internal data structure to hold list of vncs by host
-		type data struct {
-			host string
-			vncs []trqhelper.VNCServer
-		}
-
 		nodes := make(chan string, 4)
-		vncservers := make(chan data)
+		vncservers := make(chan trqhelper.VNCServer)
 
 		// worker group
 		wg := new(sync.WaitGroup)
@@ -321,9 +318,8 @@ var nodeVncCmd = &cobra.Command{
 						log.Errorf("%s: %s", c.SrvHost, err)
 					}
 
-					vncservers <- data{
-						host: c.SrvHost,
-						vncs: servers,
+					for _, s := range servers {
+						vncservers <- s
 					}
 				}
 
@@ -367,27 +363,42 @@ var nodeVncCmd = &cobra.Command{
 		}()
 
 		// reorganise internal data structure for sorting
-		_hosts := []string{}
-		_vncs := make(map[string][]trqhelper.VNCServer)
+		var _vncs []trqhelper.VNCServer
 		for d := range vncservers {
-			_hosts = append(_hosts, d.host)
-			_vncs[d.host] = d.vncs
+			_vncs = append(_vncs, d)
 		}
-		sort.Strings(_hosts)
 
-		// tabular display
+		// sort _vncs and make tabluar display on stdout
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Username", "VNC session"})
-		for _, h := range _hosts {
-			vncs := _vncs[h]
-			sort.Slice(vncs, func(i, j int) bool {
-				idi, _ := strconv.ParseUint(strings.Split(vncs[i].ID, ":")[1], 10, 32)
-				idj, _ := strconv.ParseUint(strings.Split(vncs[j].ID, ":")[1], 10, 32)
+		if groupVncByUser {
+			sort.Slice(_vncs, func(i, j int) bool {
+				return _vncs[i].Owner < _vncs[j].Owner
+			})
+			table.SetAutoMergeCells(true)
+			table.SetRowLine(true)
+		} else {
+			sort.Slice(_vncs, func(i, j int) bool {
+
+				datai := strings.Split(_vncs[i].ID, ":")
+				dataj := strings.Split(_vncs[j].ID, ":")
+
+				hosti := datai[0]
+				hostj := dataj[0]
+
+				if hosti != hostj {
+					return hosti < hostj
+				}
+
+				idi, _ := strconv.ParseUint(datai[1], 10, 32)
+				idj, _ := strconv.ParseUint(dataj[1], 10, 32)
+
 				return idi < idj
 			})
-			for _, vnc := range vncs {
-				table.Append([]string{vnc.Owner, vnc.ID})
-			}
+		}
+
+		for _, vnc := range _vncs {
+			table.Append([]string{vnc.Owner, vnc.ID})
 		}
 		table.Render()
 	},
