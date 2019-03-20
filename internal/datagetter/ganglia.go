@@ -12,8 +12,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
+	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -97,10 +97,10 @@ type gangliaRawHTML struct {
 type gangliaResource interface {
 	// Less checks whether this resource object is objectically smaller than the other resource object.
 	Less(*gangliaResource) bool
-	// WriteHeader prints resource specific header row to the writer.
-	WriteHeader(io.Writer) (int, error)
-	// WriteData prints resource data row to the writer.
-	WriteData(io.Writer, func(float64) float64) (int, error)
+	// GetTableWriterHeaders returns a slice of strings to be used by the tablewriter as tabular header.
+	GetTableWriterHeaders() []string
+	// GetTableWriterRowData() returns a slice of strings representing the resource as a data row in the tablewriter.
+	GetTableWriterRowData(func(float64) float64) []string
 	// GetHostname returns hostname on which this resource is refers to.
 	GetHostname() string
 }
@@ -129,20 +129,16 @@ func (g gangliaMemdisk) Less(other *gangliaResource) bool {
 	return g.Host < o.FieldByName("Host").String()
 }
 
-func (g gangliaMemdisk) WriteHeader(w io.Writer) (int, error) {
-	n1, err := fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", "hostname", "free(GB)", "total(GB)")
-	if err != nil {
-		return n1, err
-	}
-	n2, err := fmt.Fprintf(w, "\n %20s\t%10s\t%10s\t", "--------", "--------", "---------")
-	if err != nil {
-		return n1 + n2, err
-	}
-	return n1 + n2, nil
+func (g gangliaMemdisk) GetTableWriterHeaders() []string {
+	return []string{"hostname", "free(GB)", "total(GB)"}
 }
 
-func (g gangliaMemdisk) WriteData(w io.Writer, scaler func(float64) float64) (int, error) {
-	return fmt.Fprintf(w, "\n %20s\t%10.1f\t%10.1f\t", g.Host, scaler(g.Free), scaler(g.Total))
+func (g gangliaMemdisk) GetTableWriterRowData(scaler func(float64) float64) []string {
+	return []string{
+		g.Host,
+		fmt.Sprintf("%.1f", scaler(g.Free)),
+		fmt.Sprintf("%.1f", scaler(g.Total)),
+	}
 }
 
 // GangliaDataGetter provides interfaces to retrieve data from the Ganglia website, parse it
@@ -217,15 +213,13 @@ func (g *GangliaDataGetter) print() {
 		return g.resources[i].Less(&o)
 	})
 
-	w := new(tabwriter.Writer)
-	w.Init(os.Stdout, 8, 8, 0, '\t', tabwriter.AlignRight)
-	defer w.Flush()
-
-	g.resources[0].WriteHeader(w)
+	// create and write the tabular output using tablewriter
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(g.resources[0].GetTableWriterHeaders())
 	for _, r := range g.resources {
-		r.WriteData(w, gangliaDataScaler[g.Dataset])
+		table.Append(r.GetTableWriterRowData(gangliaDataScaler[g.Dataset]))
 	}
-	fmt.Fprintf(w, "\n")
+	table.Render()
 }
 
 // parseGangliaRawdata reads one record from the csv reader, and parse the data into the given

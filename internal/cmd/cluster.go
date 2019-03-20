@@ -12,7 +12,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"text/tabwriter"
 
 	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
@@ -376,11 +375,9 @@ var nodeVncCmd = &cobra.Command{
 		}
 		sort.Strings(_hosts)
 
-		// simple display
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 4, 0, ' ', 0)
-		fmt.Fprintf(w, "\n%-10s\t%s\t", "Username", "VNC session")
-		fmt.Fprintf(w, "\n%-10s\t%s\t", "--------", "-----------")
+		// tabular display
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Username", "VNC session"})
 		for _, h := range _hosts {
 			vncs := _vncs[h]
 			sort.Slice(vncs, func(i, j int) bool {
@@ -389,11 +386,10 @@ var nodeVncCmd = &cobra.Command{
 				return idi < idj
 			})
 			for _, vnc := range vncs {
-				fmt.Fprintf(w, "\n%-10s\t%s\t", vnc.Owner, vnc.ID)
+				table.Append([]string{vnc.Owner, vnc.ID})
 			}
 		}
-		fmt.Fprintf(w, "\n")
-		w.Flush()
+		table.Render()
 	},
 }
 
