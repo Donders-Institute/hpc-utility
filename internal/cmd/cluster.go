@@ -378,7 +378,6 @@ var nodeVncCmd = &cobra.Command{
 		// tabular display
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Username", "VNC session"})
-		table.SetAutoMergeCells(true)
 		for _, h := range _hosts {
 			vncs := _vncs[h]
 			sort.Slice(vncs, func(i, j int) bool {
