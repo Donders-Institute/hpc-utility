@@ -21,10 +21,16 @@ $ cd hpc-cluster-tools
 We then build the code with the following command:
 
 ```bash
-$ GOPATH=$HOME/projects/go make
+$ make
 ```
 
 After the build, the binaries will be located under various subdirectories in the `$GOPATH`, for example, the executables are in `$GOPATH/bin` and library files are in `$GOPATH/pkg`.
+
+One could also build RPM on a CentOS 7.x using the following command:
+
+```bash
+$ make release
+```
 
 ## Contribute to the code
 
