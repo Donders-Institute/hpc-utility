@@ -32,6 +32,14 @@ One could also build RPM on a CentOS 7.x using the following command:
 $ make release
 ```
 
+or make a GitHub release with the RPM as the release asset:
+
+```bash
+$ VERSION={RELEASE_NUMBER} make release_github
+```
+
+where the `{RELEASE_NUMBER}` is the release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
+
 ## Contribute to the code
 
 ### Folder structure of the repository
