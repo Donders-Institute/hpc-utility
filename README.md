@@ -38,7 +38,7 @@ or make a GitHub release with the RPM as the release asset:
 $ VERSION={RELEASE_NUMBER} make github_release
 ```
 
-where the `{RELEASE_NUMBER}` is the release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
+where the `{RELEASE_NUMBER}` is the new release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
 
 ## Contribute to the code
 
