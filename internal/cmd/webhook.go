@@ -6,38 +6,38 @@ import (
 	"os"
 	"path/filepath"
 
-	qaas "github.com/Donders-Institute/hpc-qaas/pkg/client"
+	whc "github.com/Donders-Institute/hpc-webhook/pkg/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var qaasHost string
-var qaasPort int
-var qaasCertFile string
+var webhookHost string
+var webhookPort int
+var webhookCertFile string
 var webhookName string
 var webhookPayload string
 var webhookPayloadType string
 
 // variable may be set at the build time to fix the default location for the QaaS server certificate.
-var defQaasCert string
+var defWebhookCert string
 
 func init() {
 
-	qaasCmd.PersistentFlags().StringVarP(&qaasHost, "server", "s", "qaas.dccn.nl", "QaaS service hostname")
-	qaasCmd.PersistentFlags().IntVarP(&qaasPort, "port", "p", 443, "QaaS service hostname")
-	qaasCmd.PersistentFlags().StringVarP(&qaasCertFile, "cert", "c", defQaasCert, "QaaS service SSL certificate")
+	webhookCmd.PersistentFlags().StringVarP(&webhookHost, "server", "s", "hpc-webhook.dccn.nl", "HPC webhook service hostname")
+	webhookCmd.PersistentFlags().IntVarP(&webhookPort, "port", "p", 443, "HPC webhook service hostname")
+	webhookCmd.PersistentFlags().StringVarP(&webhookCertFile, "cert", "c", defWebhookCert, "HPC webhook service SSL certificate")
 
 	createCmd.Flags().StringVarP(&webhookName, "name", "n", "", "name or a short description of the webhook")
 	triggerCmd.Flags().StringVarP(&webhookPayload, "payload", "l", "", "file containing the webhook payload data")
 	triggerCmd.Flags().StringVarP(&webhookPayloadType, "type", "t", "json", "webhook payload data type (json, xml or txt)")
 
-	qaasCmd.AddCommand(createCmd, deleteCmd, infoCmd, triggerCmd, listCmd)
-	rootCmd.AddCommand(qaasCmd)
+	webhookCmd.AddCommand(createCmd, deleteCmd, infoCmd, triggerCmd, listCmd)
+	rootCmd.AddCommand(webhookCmd)
 }
 
-var qaasCmd = &cobra.Command{
+var webhookCmd = &cobra.Command{
 	Use:   "webhook",
-	Short: "Manage webhooks on the Qsub-as-a-Service (QaaS).",
+	Short: "Manage HPC webhooks.",
 	Long:  ``,
 }
 
@@ -52,7 +52,11 @@ var createCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := whc.WebhookConfig{
+			HPCWebhookHost:     webhookHost,
+			HPCWebhookPort:     webhookPort,
+			HPCWebhookCertFile: webhookCertFile,
+		}
 		url, err := webhook.New(args[0], webhookName)
 		if err != nil {
 			log.Errorf("fail creating new webhook: %+v\n", err)
@@ -64,11 +68,15 @@ var createCmd = &cobra.Command{
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List availabile webhooks.",
+	Short: "List webhooks.",
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := whc.WebhookConfig{
+			HPCWebhookHost:     webhookHost,
+			HPCWebhookPort:     webhookPort,
+			HPCWebhookCertFile: webhookCertFile,
+		}
 		ws, err := webhook.List()
 		if err != nil {
 			log.Errorf("fail retriving list of webhooks: %+v\n", err)
@@ -86,7 +94,11 @@ var deleteCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := whc.WebhookConfig{
+			HPCWebhookHost:     webhookHost,
+			HPCWebhookPort:     webhookPort,
+			HPCWebhookCertFile: webhookCertFile,
+		}
 		for _, id := range args {
 			if err := webhook.Delete(id, true); err != nil {
 				log.Errorf("%s: %s\n", err, id)
@@ -103,7 +115,11 @@ var infoCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := whc.WebhookConfig{
+			HPCWebhookHost:     webhookHost,
+			HPCWebhookPort:     webhookPort,
+			HPCWebhookCertFile: webhookCertFile,
+		}
 		for _, id := range args {
 			if info, err := webhook.GetInfo(id); err != nil {
 				log.Errorf("%s: %s\n", err, id)
@@ -143,7 +159,11 @@ var triggerCmd = &cobra.Command{
 		}
 
 		// get webhook info
-		webhook := qaas.WebhookConfig{QaasHost: qaasHost, QaasPort: qaasPort, QaasCertFile: qaasCertFile}
+		webhook := whc.WebhookConfig{
+			HPCWebhookHost:     webhookHost,
+			HPCWebhookPort:     webhookPort,
+			HPCWebhookCertFile: webhookCertFile,
+		}
 		info, err := webhook.GetInfo(args[0])
 		if err != nil {
 			log.Fatalln(err)
@@ -161,7 +181,7 @@ var triggerCmd = &cobra.Command{
 		}
 
 		// make a POST call to the Webhook's URL with the content of payload as request body
-		rspData, err := info.TriggerWebhook(dataPayload, reqBodyType, qaasCertFile)
+		rspData, err := info.TriggerWebhook(dataPayload, reqBodyType, webhookCertFile)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -170,7 +190,7 @@ var triggerCmd = &cobra.Command{
 }
 
 // printWebhookConfigInfo writes one or multiple WebhookConfigInfo data objects to the stdout.
-func printWebhookConfigInfo(infoList ...qaas.WebhookConfigInfo) {
+func printWebhookConfigInfo(infoList ...whc.WebhookConfigInfo) {
 	for _, info := range infoList {
 		fmt.Printf("\n%-s", info.ID)
 		fmt.Printf("\n\t%-16s:%-s", "Description", info.Description)

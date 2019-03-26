@@ -7,7 +7,7 @@ GOOS ?= "linux"
 CACERTDIR ?= "/etc/pki/tls/certs"
 
 GOLDFLAGS = "-X github.com/Donders-Institute/hpc-cluster-tools/internal/cmd.defTorqueHelperCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt \
--X github.com/Donders-Institute/hpc-cluster-tools/internal/cmd.defQaasCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt"
+-X github.com/Donders-Institute/hpc-cluster-tools/internal/cmd.defWebhookCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt"
 
 all: build
 
