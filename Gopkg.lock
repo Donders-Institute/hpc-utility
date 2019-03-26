@@ -3,17 +3,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:92173991d7ae5c2f7773ad314f7cdd3bff465cd0a71acbad2c0bd7db3a6d1a71"
-  name = "github.com/Donders-Institute/hpc-qaas"
-  packages = [
-    "internal/server",
-    "pkg/client",
-  ]
-  pruneopts = "UT"
-  revision = "2be195dff27796382b2d738a660d57afd4f843b3"
-
-[[projects]]
-  branch = "master"
   digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
@@ -23,6 +12,17 @@
   ]
   pruneopts = "UT"
   revision = "d78ac109a09275fae2b2870d835454c477c8a65e"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d9f8a35494adf2dbaa81f572f8cd5609ec6436460aba127172139aa768c903a2"
+  name = "github.com/Donders-Institute/hpc-webhook"
+  packages = [
+    "internal/server",
+    "pkg/client",
+  ]
+  pruneopts = "UT"
+  revision = "5fd972e5f9a7636b275fded0e88fcc7933e92793"
 
 [[projects]]
   digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
@@ -234,8 +234,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Donders-Institute/hpc-qaas/pkg/client",
     "github.com/Donders-Institute/hpc-torque-helper/pkg/client",
+    "github.com/Donders-Institute/hpc-webhook/pkg/client",
     "github.com/olekukonko/tablewriter",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",

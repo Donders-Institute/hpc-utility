@@ -27,7 +27,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/Donders-Institute/hpc-qaas"
+  name = "github.com/Donders-Institute/hpc-webhook"
 
 [[constraint]]
   branch = "master"
