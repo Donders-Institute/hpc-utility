@@ -193,10 +193,10 @@ var triggerCmd = &cobra.Command{
 func printWebhookConfigInfo(infoList ...whc.WebhookConfigInfo) {
 	for _, info := range infoList {
 		fmt.Printf("\n%-s", info.ID)
-		fmt.Printf("\n\t%-16s:%-s", "Description", info.Description)
-		fmt.Printf("\n\t%-16s:%-s", "Creation time", info.CreationTime)
-		fmt.Printf("\n\t%-16s:%-s", "Script path", info.Script)
-		fmt.Printf("\n\t%-16s:%-s", "Webhook URL", info.WebhookURL)
+		fmt.Printf("\n\t%-16s: %-s", "Description", info.Description)
+		fmt.Printf("\n\t%-16s: %-s", "Creation time", info.CreationTime)
+		fmt.Printf("\n\t%-16s: %-s", "Script path", info.Script)
+		fmt.Printf("\n\t%-16s: %-s", "Webhook URL", info.WebhookURL)
 		fmt.Println()
 	}
 }
