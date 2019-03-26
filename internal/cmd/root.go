@@ -33,8 +33,8 @@ const (
 	funcBashCompletion = `__hpcutil_get_webhook_ids()
 {
 	local hpcutil_webhook_ids out
-    if hpcutil_webhook_ids=$(find $HOME/.qaas -maxdepth 1 ! -path $HOME/.qaas -type d -print 2>/dev/null); then
-        out=( $(echo "${hpcutil_webhook_ids}" | awk -F '.qaas/' {'print $2'}) )
+    if hpcutil_webhook_ids=$(hpcutil webhook list | egrep -e '^\S+' 2>/dev/null); then
+        out=( $(echo "${hpcutil_webhook_ids}") )
         COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
 	fi
 	return 0
