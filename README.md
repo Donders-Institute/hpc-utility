@@ -21,10 +21,24 @@ $ cd hpc-cluster-tools
 We then build the code with the following command:
 
 ```bash
-$ GOPATH=$HOME/projects/go make
+$ make
 ```
 
 After the build, the binaries will be located under various subdirectories in the `$GOPATH`, for example, the executables are in `$GOPATH/bin` and library files are in `$GOPATH/pkg`.
+
+One could also build RPM on a CentOS 7.x using the following command:
+
+```bash
+$ make release
+```
+
+or make a GitHub release with the RPM as the release asset:
+
+```bash
+$ VERSION={RELEASE_NUMBER} make github_release
+```
+
+where the `{RELEASE_NUMBER}` is the new release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
 
 ## Contribute to the code
 
