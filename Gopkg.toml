@@ -26,8 +26,8 @@
 
 
 [[constraint]]
-  branch = "master"
   name = "github.com/Donders-Institute/hpc-webhook"
+  version = "0.3.0"
 
 [[constraint]]
   branch = "master"

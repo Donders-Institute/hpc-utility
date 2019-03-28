@@ -11,18 +11,18 @@
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "d78ac109a09275fae2b2870d835454c477c8a65e"
+  revision = "da65f8f6f23223e5013707b6e2e9c12bc9142431"
 
 [[projects]]
-  branch = "master"
-  digest = "1:d9f8a35494adf2dbaa81f572f8cd5609ec6436460aba127172139aa768c903a2"
+  digest = "1:2bfdedfd850e7397e78ff9d8c4cf42c63d92318f3d1a7296ee0c11fa17dfd135"
   name = "github.com/Donders-Institute/hpc-webhook"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "5fd972e5f9a7636b275fded0e88fcc7933e92793"
+  revision = "51323de627fa543d9bc73f5049e759990e3c2beb"
+  version = "0.3.0"
 
 [[projects]]
   digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
@@ -116,7 +116,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e86b06b02faaecaa9eb62062d3e7b65b58399b65a86056dbad6be5e5857e4598"
+  digest = "1:2f853a86c2a5f407020543d2db12d00b6408e0726ce6d55231d9a4b5b2f2a189"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
@@ -129,11 +129,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "a1f597ede03a7bef967a422b5b3a5bd08805a01e"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
-  digest = "1:4512c74e2c934a151fa9246cdc565d29611f53295bfb05e7a6275e80ee540a0c"
+  digest = "1:a7550c619a7f9701bc2f0b2c866668a207cfb693a2834796f723d2c78b514372"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -145,11 +145,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "9f648a60d9775ef5c977e7669d1673a7a67bef33"
+  revision = "63eda1eb0650888965ead1296efd04d0b2b61128"
 
 [[projects]]
   branch = "master"
-  digest = "1:450becdbf6739398b40a71ea3416b67c74547e808849dbbd85f01a3b98e42417"
+  digest = "1:78ed3d0c6d5b4996ef2867e280f39ea7b44438558c6331721740ab9061db532c"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -157,7 +157,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a2f829d7f35f2ed1c3520c553a6226495455cae0"
+  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -188,10 +188,10 @@
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "5fe7a883aa19554f42890211544aa549836af7b7"
+  revision = "d831d65fe17df2e52bcc4316d4a9f7a418701f43"
 
 [[projects]]
-  digest = "1:cbc746de4662c66fd24a037501bd65aa0f8ad0bfca0c92576e0abb88864e3741"
+  digest = "1:c00eb80d7b152379c3e94c38d82b29deca98b1d0f53e4e20362589b7fcbffa07"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -227,8 +227,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "2fdaae294f38ed9a121193c51ec99fecd3b13eb7"
-  version = "v1.19.0"
+  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
+  version = "v1.19.1"
 
 [solve-meta]
   analyzer-name = "dep"
