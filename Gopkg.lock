@@ -14,15 +14,15 @@
   revision = "da65f8f6f23223e5013707b6e2e9c12bc9142431"
 
 [[projects]]
-  digest = "1:2bfdedfd850e7397e78ff9d8c4cf42c63d92318f3d1a7296ee0c11fa17dfd135"
+  digest = "1:35a635ab8bdf3c8e1277cd9c8d58d77e45a4e90c7fd8978c5de165190ed4f5fc"
   name = "github.com/Donders-Institute/hpc-webhook"
   packages = [
     "internal/server",
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "51323de627fa543d9bc73f5049e759990e3c2beb"
-  version = "0.3.0"
+  revision = "3fddb5836efe01910c12684cd45e15ceb2a58a46"
+  version = "0.3.2"
 
 [[projects]]
   digest = "1:2624ed1a47149456f5e9bb48ae8fabf66a8b772d0a5430abba34cb527c4830e3"
@@ -145,11 +145,11 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "63eda1eb0650888965ead1296efd04d0b2b61128"
+  revision = "74de082e2cca95839e88aa0aeee5aadf6ce7710f"
 
 [[projects]]
   branch = "master"
-  digest = "1:78ed3d0c6d5b4996ef2867e280f39ea7b44438558c6331721740ab9061db532c"
+  digest = "1:30d79a7786136afb612559f0f18766abef329ee1bdde840e696d7fcf869211d1"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -157,7 +157,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
+  revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
