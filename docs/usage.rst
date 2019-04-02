@@ -25,11 +25,11 @@ It shows another level of subcommands that are available, for instance:
 .. code:: bash
 
     Available Commands:
-        config      Print Torque and Moab server configurations.
-        job         Retrieve information about a cluster job.
-        matlablic   Print a summary of the Matlab license usage.
-        nodes       Retrieve information about cluster nodes.
-        qstat       Print job list in the memory of the Torque server.
+      config      Print Torque and Moab server configurations.
+      job         Retrieve information about a cluster job.
+      matlablic   Print a summary of the Matlab license usage.
+      nodes       Retrieve information about cluster nodes.
+      qstat       Print job list in the memory of the Torque server.
 
 One can then take one from those available command to move onto another level of the sub-commands.  For example, if one wants to get nodes resource information, one does
 
@@ -42,9 +42,9 @@ and via the supported subcommands shown below, you will be able to get resource 
 .. code:: bash
 
     Available Commands:
-        diskfree    Print total and free disk space of the cluster nodes.
-        memfree     Print total and free memory on the cluster nodes.
-        vnc         Print list of VNC servers on the cluster or a specific node.
+      diskfree    Print total and free disk space of the cluster nodes.
+      memfree     Print total and free memory on the cluster nodes.
+      vnc         Print list of VNC servers on the cluster or a specific node.
 
 Example: list MATLAB licenses allocated by DCCN users
 *****************************************************
@@ -116,3 +116,16 @@ The ``webhook`` subcommand is used to manage the webhook facility of the HPC clu
     $ hpcutil webhook -h
 
 where ``-h`` is optional.
+
+Instructions about creating and enabling webhook is provided by `This link <https://github.com/Donders-Institute/hpc-webhook/blob/master/docs/instructions.md>`_. The instruction here will focus on the management perspective of the webhooks.
+
+There are four subcommands supported:
+
+.. code:: bash
+
+    Available Commands:
+      create      Create a new webhook.
+      delete      Delete an existing webhook.
+      info        Retrieve information of an existing webhook.
+      list        List webhooks.
+      trigger     Trigger webhook manually with a payload.
