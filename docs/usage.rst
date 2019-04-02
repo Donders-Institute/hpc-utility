@@ -46,8 +46,8 @@ and via the supported subcommands shown below, you will be able to get resource 
         memfree     Print total and free memory on the cluster nodes.
         vnc         Print list of VNC servers on the cluster or a specific node.
 
-Example: list matlab license usage
-**********************************
+Example: list MATLAB licenses allocated by DCCN users
+*****************************************************
 
 .. code:: bash
 
