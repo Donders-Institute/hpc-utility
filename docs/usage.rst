@@ -5,18 +5,20 @@ Usage
 
 The single CLI tool provided by this package is called ``hpcutil``. The usage of it is similar to the CLI of ``git`` where a group of (sub-)sub-commands are provided in a hierarchical manner.
 
-The inline help for a subcommand and associated flags (options) of it is always available via the ``-h`` option.  It also supports tab-completion in the Bash shell by which one could resolve the feasible subcommands, flags or options by press the TAB key twice.
+The inline help for a subcommand and associated flags (options) of it is always available via the ``-h`` option.  It also supports tab-completion in the Bash shell which means that one could resolve the available subcommands or flags by pressing the TAB key twice.
 
-Currently, the CLI provides two main subcommands: ``cluster`` and ``webhook``.
+Currently, the CLI provides two main subcommands on the first level: ``cluster`` and ``webhook``.
 
 The ``cluster`` subcommand
 --------------------------
 
-The ``cluster`` subcommand is uses to access job or resource (node, software license) information on the HPC cluster.  To get the inline help of the ``cluster`` subcommand, one uses the following command in the terminal:
+The ``cluster`` subcommand can be used to retrieve job or resource (node, software license) information of the HPC cluster.  To get the in-terminal help of the ``cluster`` subcommand, one uses the following command in the terminal:
 
 .. code:: bash
 
-    $ hpcutil cluster
+    $ hpcutil cluster -h
+
+where ``-h`` is optional.
 
 It shows another level of subcommands that are available, for instance:
 
@@ -107,8 +109,10 @@ Assuming a job with ID ``1234567``, the job trace log can be obtained from the T
 The ``webhook`` subcommand
 --------------------------
 
-The ``webhook`` subcommand is uses to manage the webhook facility of the HPC cluster.  To get the inline help of the ``webhook`` subcommand, one uses the following command in the terminal:
+The ``webhook`` subcommand is used to manage the webhook facility of the HPC cluster.  To get the in-terminal help of the ``webhook`` subcommand, one uses the following command in the terminal:
 
 .. code:: bash
 
-    $ hpcutil webhook
+    $ hpcutil webhook -h
+
+where ``-h`` is optional.
