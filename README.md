@@ -40,6 +40,10 @@ $ VERSION={RELEASE_NUMBER} make github_release
 
 where the `{RELEASE_NUMBER}` is the new release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
 
+## Usage
+
+The usage document can be found [here](docs/usage.rst).
+
 ## Contribute to the code
 
 ### Folder structure of the repository
