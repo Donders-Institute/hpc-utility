@@ -106,7 +106,7 @@ or apply the command to the `watch <https://linux.die.net/man/1/watch>`_ command
 Example: get job's trace log
 ****************************
 
-Assuming a job with ID ``1234567``, the job trace log can be obtained from the Torque server via the following command:
+Assuming a job with ID ``1234567``, the job trace log (in the last 3 days) can be obtained from the Torque server via the following command:
 
 .. code:: bash
 
