@@ -5,7 +5,7 @@ Usage
 
 The single CLI tool provided by this package is called ``hpcutil``. The usage of it is similar to the CLI of ``git`` where a group of (sub-)sub-commands are provided in a hierarchical manner.
 
-The inline help for a subcommand and associated flags (options) of it is always available via the ``-h`` option.  It also supports tab-completion in the Bash shell which means that one could resolve the available subcommands or flags by pressing the TAB key twice.
+The in-terminal help for a subcommand and the supported flags of it are always available via the ``-h`` option.  The CLI also supports tab-completion in `BASH <https://nl.wikipedia.org/wiki/Bash>`_ which means the suggested subcommands or flags is available by pressing the TAB key twice.
 
 Currently, the CLI provides two main subcommands on the first level: ``cluster`` and ``webhook``.
 
