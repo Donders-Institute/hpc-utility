@@ -151,7 +151,7 @@ One could also give a short descript to the created webhook so that it can be ea
 
 .. code:: bash
 
-    $ hpcutil webhook create test.sh -n "My first webhook"
+    $ hpcutil webhook create qsub.sh -n "My first webhook"
     
 Example: list available webhooks
 ********************************
@@ -162,7 +162,17 @@ For listing available webhooks, one does:
 
     $ hpcutil webhook list
     
-Every returned webhook has a unique id. This unique id is used in ``info``, ``delete`` and ``trigger`` subcommands to identify a webhook.
+Every returned webhook has a unique id. For instance,
+
+.. code:: bash
+
+    1e846adf-462b-4a7b-b183-651909072b79
+	    Description     : My first webhook
+	    Creation time   : 2019-04-03T08:28:38Z
+	    Script path     : /home/tg/honlee/qsub.sh
+	    Webhook URL     : https://hpc-webhook.dccn.nl:443/webhook/1e846adf-462b-4a7b-b183-651909072b79
+
+This unique id, i.e. ``1e846adf-462b-4a7b-b183-651909072b79`` in the example above, is used in ``info``, ``delete`` and ``trigger`` subcommands to identify a webhook.
 
 .. tip::
 
