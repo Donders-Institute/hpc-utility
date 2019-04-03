@@ -139,11 +139,11 @@ There are five subcommands supported:
 Example: create a new webhook
 *****************************
 
-Assuming that we want to create a new webhook associated with a Torque cluster job script ``run.sh``, we can used the following command:
+Assuming that we want to create a new webhook associated with a Torque cluster job script ``qsub.sh`` (an example can be found `here <https://github.com/Donders-Institute/hpc-webhook/blob/master/test/data/qsub.sh>`_, we can used the following command:
 
 .. code:: bash
 
-    $ hpcutil webhook create test.sh
+    $ hpcutil webhook create qsub.sh
     
 On success, it returns the actual webhook URL which can be then registered at a webhook trigger, such as the `webhook for a GitHub repository <https://developer.github.com/webhooks/>`_.
 
@@ -162,6 +162,12 @@ For listing available webhooks, one does:
 
     $ hpcutil webhook list
     
+Every returned webhook has a unique id. This unique id is used in ``info``, ``delete`` and ``trigger`` subcommands to identify a webhook.
+
+.. tip::
+
+    The tab-completion is also applicable to the webhook IDs.  This is useful to quickly select a webhook ID when using the ``info``, ``delete`` and ``trigger`` subcommands.
+    
 Example: trigger a webhook
 **************************
 
@@ -174,7 +180,3 @@ Assuming we have prepared a GitHub webhook payload file called ``payload.json`` 
     $ hpcutil webhook trigger 1e846adf-462b-4a7b-b183-651909072b79 -l payload.json -t json
     
 where the ``-t json`` is redundent in this case as by default, the payload is take as JSON format.  If your payload is in another format (e.g. XML or plain text), you will need to use the ``-t`` option to specify it.
-
-.. tip::
-
-    The tab-completion is also applicable to the webhook IDs.  This is useful to quickly select a webhook ID when using the ``info``, ``delete`` and ``trigger`` subcommands.
