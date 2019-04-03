@@ -125,7 +125,7 @@ where ``-h`` is optional.
 
 Instructions about creating and enabling webhook is provided by `This link <https://github.com/Donders-Institute/hpc-webhook/blob/master/docs/instructions.md>`_. The instruction here will focus on the management perspective of the webhooks.
 
-There are four subcommands supported:
+There are five subcommands supported:
 
 .. code:: bash
 
@@ -135,3 +135,46 @@ There are four subcommands supported:
       info        Retrieve information of an existing webhook.
       list        List webhooks.
       trigger     Trigger webhook manually with a payload.
+      
+Example: create a new webhook
+*****************************
+
+Assuming that we want to create a new webhook associated with a Torque cluster job script ``run.sh``, we can used the following command:
+
+.. code:: bash
+
+    $ hpcutil webhook create test.sh
+    
+On success, it returns the actual webhook URL which can be then registered at a webhook trigger, such as the `webhook for a GitHub repository <https://developer.github.com/webhooks/>`_.
+
+One could also give a short descript to the created webhook so that it can be easily identified later.  This is done through the ``-n`` flag.  For example,
+
+.. code:: bash
+
+    $ hpcutil webhook create test.sh -n "My first webhook"
+    
+Example: list available webhooks
+********************************
+
+For listing available webhooks, one does:
+
+.. code:: bash
+
+    $ hpcutil webhook list
+    
+Example: trigger a webhook
+**************************
+
+Normally the webhook is meant to be triggered externally (e.g. a commit to GitHub, a new message posted on Twitter, etc.).  The ``trigger`` subcommand here is only meant to help you test the trigger with a manually provided payload.
+
+Assuming we have prepared a GitHub webhook payload file called ``payload.json`` (some payload examples can be seen `here <https://github.com/Donders-Institute/hpc-webhook/tree/master/test/data>`_), we can trigger a webhook with ID ``1e846adf-462b-4a7b-b183-651909072b79`` with the payload using the following command:
+
+.. code:: bash
+
+    $ hpcutil webhook trigger 1e846adf-462b-4a7b-b183-651909072b79 -l payload.json -t json
+    
+where the ``-t json`` is redundent in this case as by default, the payload is take as JSON format.  If your payload is in another format (e.g. XML or plain text), you will need to use the ``-t`` option to specify it.
+
+.. tip::
+
+    The tab-completion is also applicable to the webhook IDs.  This is useful to quickly select a webhook ID when using the ``info``, ``delete`` and ``trigger`` subcommands.
