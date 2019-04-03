@@ -164,7 +164,7 @@ For listing available webhooks, one does:
     
 Every returned webhook has a unique id. For instance,
 
-.. code:: bash
+.. code::
 
     1e846adf-462b-4a7b-b183-651909072b79
 	    Description     : My first webhook
