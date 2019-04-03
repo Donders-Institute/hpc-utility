@@ -176,7 +176,7 @@ This unique id, i.e. ``1e846adf-462b-4a7b-b183-651909072b79`` in the example abo
 
 .. tip::
 
-    The tab-completion is also applicable to the webhook IDs.  This is useful to quickly select a webhook ID when using the ``info``, ``delete`` and ``trigger`` subcommands.
+    The tab-completion is also applicable to the webhook ids.  This is useful to selecting a valid webhook id for the ``info``, ``delete`` and ``trigger`` subcommands.
     
 Example: trigger a webhook
 **************************
