@@ -91,11 +91,17 @@ Example: show all cluster jobs
 Example: check memory utilization of a running job
 **************************************************
 
-Assuming a running job with ID ``1234567``, the owner of the job can perform the following command to check the memory usage in real time:
+Assuming a running job with ID ``1234567``, the owner of the job can perform the following command to check the memory usage:
 
 .. code:: bash
 
     $ hpcutil cluster job meminfo 1234567
+    
+or apply the command to the `watch <https://linux.die.net/man/1/watch>`_ command to monitor the memory usage in real time:
+
+.. code:: bash
+
+    $ watch hpcutil cluster job meminfo 1234567
 
 Example: get job's trace log
 ****************************
