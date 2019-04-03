@@ -165,7 +165,7 @@ For listing available webhooks, one does:
 Example: trigger a webhook
 **************************
 
-Normally the webhook is triggered externally upon an event (e.g. a commit to GitHub, a new message posted on Twitter, etc.).  The ``trigger`` subcommand here is only meant to help you test the trigger with a manually provided payload.
+Normally the webhook is triggered externally upon an event (e.g. a commit to GitHub, a new message posted on Twitter, etc.).  The ``trigger`` subcommand here is only meant to help you test the webhook by manually trigger it with a provided payload.
 
 Assuming we have prepared a GitHub webhook payload file called ``payload.json`` (some payload examples can be seen `here <https://github.com/Donders-Institute/hpc-webhook/tree/master/test/data>`_), we can trigger a webhook with ID ``1e846adf-462b-4a7b-b183-651909072b79`` with the payload using the following command:
 
