@@ -2,7 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
   digest = "1:e781dca8d66b12617089955ed1b91c555fa950198876af7707b4ded599cbe17b"
   name = "github.com/Donders-Institute/hpc-torque-helper"
   packages = [
@@ -11,7 +10,8 @@
     "pkg/client",
   ]
   pruneopts = "UT"
-  revision = "da65f8f6f23223e5013707b6e2e9c12bc9142431"
+  revision = "bd0db2c59b0cf583d2ab6c915a90ed8ef7b24546"
+  version = "1.2.0"
 
 [[projects]]
   digest = "1:35a635ab8bdf3c8e1277cd9c8d58d77e45a4e90c7fd8978c5de165190ed4f5fc"

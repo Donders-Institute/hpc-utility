@@ -30,8 +30,8 @@
   version = "0.3.2"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/Donders-Institute/hpc-torque-helper"
+  version = "1.2.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
