@@ -81,7 +81,7 @@ if [ $? -ne 0 ]; then
 fi
 
 while [ "$gh_name" == "" ]; do
-    read -s -p "github username: " gh_name
+    read -p "github username: " gh_name
 done
 echo
 
