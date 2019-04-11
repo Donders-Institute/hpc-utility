@@ -1,0 +1,26 @@
+###############################################################################
+# This is an ansible playbook for deploying RPMs onto various servers on the
+# HPC cluster at DCCN.
+#
+# use command:
+#
+#     $ ansible-playbook ansible.yml -K
+#
+###############################################################################
+- hosts: pbs_mom:mentat
+  become: yes
+  vars:
+    release: 0.4.0-1.el7.x86_64
+  tasks:
+    - name: check existence of the RPMs
+      register: ls
+      shell: ls -l
+      args:
+        chdir: /mnt/install/kickstart-7/miscpkgs/torque-helper/
+    #- debug: var=ls.stdout_lines
+    - name: install/update hpc-utility package
+      register: yum
+      yum:
+        name: /mnt/install/kickstart-7/miscpkgs/torque-helper/hpc-utility-{{ release }}.rpm
+        state: present
+    #- debug: var=yum.results
