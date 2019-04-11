@@ -55,7 +55,7 @@ gh_pass=""
 RPM_BUILD_ROOT=$HOME/rpmbuild
 
 GH_ORG="Donders-Institute"
-GH_REPO_NAME="hpc-cluster-tools"
+GH_REPO_NAME="hpc-utility"
 
 GH_API="https://api.github.com"
 GH_REPO="$GH_API/repos/$GH_ORG/$GH_REPO_NAME"

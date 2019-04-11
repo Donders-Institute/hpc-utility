@@ -13,7 +13,7 @@ import (
 	"sync"
 	"syscall"
 
-	dg "github.com/Donders-Institute/hpc-cluster-tools/internal/datagetter"
+	dg "github.com/Donders-Institute/hpc-utility/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"

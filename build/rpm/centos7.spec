@@ -2,7 +2,7 @@
 # rpmbuild -bb
 %define debug_package %{nil}
 
-Name:       hpc-cluster-tools
+Name:       hpc-utility
 Version:    %{getenv:VERSION}
 Release:    1%{?dist}
 Summary:    Unified CLI tools for cluster utilities and services.

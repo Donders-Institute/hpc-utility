@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Donders-Institute/hpc-cluster-tools/internal/cmd"
+	"github.com/Donders-Institute/hpc-utility/internal/cmd"
 )
 
 func main() {

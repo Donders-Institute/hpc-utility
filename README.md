@@ -1,6 +1,6 @@
-# hpc-cluster-tools
+# hpc-utility
 
-CLI tools for the High Performance Computing (HPC) cluster.
+CLI utility for the High Performance Computing (HPC) cluster.
 
 ## Clone and build the code
 
@@ -14,8 +14,8 @@ Assuming we use `$HOME/projects/go` as the `$GOPATH`, we will then clone the cod
 $ export GOPATH=$HOME/projects/go
 $ mkdir -p $GOPATH/src/github.com/Donders-Institute
 $ cd $GOPATH/src/github.com/Donders-Institute
-$ git clone https://github.com/Donders-Institute/hpc-cluster-tools.git
-$ cd hpc-cluster-tools
+$ git clone https://github.com/Donders-Institute/hpc-utility.git
+$ cd hpc-utility
 ```
 
 We then build the code with the following command:
@@ -38,7 +38,7 @@ or make a GitHub release with the RPM as the release asset:
 $ VERSION={RELEASE_NUMBER} make github_release
 ```
 
-where the `{RELEASE_NUMBER}` is the new release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-cluster-tools/releases). It cannot be an existing release number.
+where the `{RELEASE_NUMBER}` is the new release number to be created on this repository's [release page](https://github.com/Donders-Institute/hpc-utility/releases). It cannot be an existing release number.
 
 ## Usage
 
