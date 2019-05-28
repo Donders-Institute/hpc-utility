@@ -26,16 +26,22 @@ const (
 	MemoryUsageComputeNode gangliaDataset = iota
 	// DiskUsageComputeNode is a predefined ganglia dataset of disk usage on the compute nodes.
 	DiskUsageComputeNode
+	// InfoComputeNode is a predefined ganglia dataset of resource usage, system load on the compute nodes.
+	InfoComputeNode
 	// MemoryUsageAccessNode is a predefined ganglia dataset of memory usage on the access nodes.
 	MemoryUsageAccessNode
 	// DiskUsageAccessNode is a predefined ganglia dataset of disk usage on the access nodes.
 	DiskUsageAccessNode
+	// InfoAccessNode is a predefined ganglia dataset of resource usage, system load on the access nodes.
+	InfoAccessNode
 )
 
 // gangliaURLs defines ganglia data retrieval endpoints for different predefined datasets.
 var gangliaURLs = map[gangliaDataset]string{
+	InfoAccessNode:         "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=load_one.VAL&cols[]=load_five.VAL&cols[]=mem_free.VAL&cols[]=mem_total.VAL&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader",
 	MemoryUsageAccessNode:  "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=mem_free.VAL&cols[]=mem_total.VAL&noheader",
 	DiskUsageAccessNode:    "http://ganglia.dccn.nl/rawdata.php?c=Mentat%20Cluster&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader",
+	InfoComputeNode:        "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=load_one.VAL&cols[]=load_five.VAL&cols[]=mem_free.VAL&cols[]=mem_total.VAL&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader",
 	MemoryUsageComputeNode: "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=mem_free.VAL&cols[]=mem_total.VAL&noheader",
 	DiskUsageComputeNode:   "http://ganglia.dccn.nl/rawdata.php?c=Torque%20Cluster&cols[]=disk_free.VAL&cols[]=disk_total.VAL&noheader",
 }
@@ -82,8 +88,10 @@ func GetComputeNodes() ([]string, error) {
 var gangliaDataScaler = map[gangliaDataset]func(float64) float64{
 	MemoryUsageAccessNode:  scalerMib2gib,
 	DiskUsageAccessNode:    scalerIdentical,
+	InfoAccessNode:         scalerIdentical,
 	MemoryUsageComputeNode: scalerMib2gib,
 	DiskUsageComputeNode:   scalerIdentical,
+	InfoComputeNode:        scalerIdentical,
 }
 
 // gangliaRawHTML is a data object for unmarshaling the HTML document retrieved from ganglia.
@@ -97,6 +105,8 @@ type gangliaRawHTML struct {
 type gangliaResource interface {
 	// Less checks whether this resource object is objectically smaller than the other resource object.
 	Less(*gangliaResource) bool
+	// Parse reads one CSV row from the csv.Reader and converts it into a new gangliaResource.
+	Parse(*csv.Reader) (gangliaResource, error)
 	// GetTableWriterHeaders returns a slice of strings to be used by the tablewriter as tabular header.
 	GetTableWriterHeaders() []string
 	// GetTableWriterRowData() returns a slice of strings representing the resource as a data row in the tablewriter.
@@ -105,11 +115,106 @@ type gangliaResource interface {
 	GetHostname() string
 }
 
+// gangliaSysinfo implements the gangliaResource interface for getting and reporting system load, memory and disk resources.
+type gangliaSysinfo struct {
+	Host      string
+	Load1     float64
+	Load5     float64
+	MemFree   float64
+	MemTotal  float64
+	DiskFree  float64
+	DiskTotal float64
+}
+
+func (g gangliaSysinfo) Parse(reader *csv.Reader) (gangliaResource, error) {
+
+	record, err := reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(record) < 7 {
+		return nil, fmt.Errorf("invalid data record: %+v", record)
+	}
+
+	r := gangliaSysinfo{}
+
+	r.Host = record[0]
+	if r.Load1, err = strconv.ParseFloat(record[1], 64); err != nil {
+		return nil, err
+	}
+	if r.Load5, err = strconv.ParseFloat(record[2], 64); err != nil {
+		return nil, err
+	}
+	if r.MemFree, err = strconv.ParseFloat(record[3], 64); err != nil {
+		return nil, err
+	}
+	if r.MemTotal, err = strconv.ParseFloat(record[4], 64); err != nil {
+		return nil, err
+	}
+	if r.DiskFree, err = strconv.ParseFloat(record[5], 64); err != nil {
+		return nil, err
+	}
+	if r.DiskTotal, err = strconv.ParseFloat(record[6], 64); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (g gangliaSysinfo) GetHostname() string {
+	return g.Host
+}
+
+func (g gangliaSysinfo) Less(other *gangliaResource) bool {
+	o := reflect.ValueOf(other).Elem().Elem()
+	return g.Host < o.FieldByName("Host").String()
+}
+
+func (g gangliaSysinfo) GetTableWriterHeaders() []string {
+	return []string{"hostname", "load1", "load5", "mem free(GB)", "mem total(GB)", "disk free(GB)", "disk total(GB)"}
+}
+
+func (g gangliaSysinfo) GetTableWriterRowData(scaler func(float64) float64) []string {
+	// in this function, the scaler is ignored as we know what to do with the scaling of the values.
+	return []string{
+		g.Host,
+		fmt.Sprintf("%.1f", g.Load1),
+		fmt.Sprintf("%.1f", g.Load5),
+		fmt.Sprintf("%.1f", scalerMib2gib(g.MemFree)),
+		fmt.Sprintf("%.1f", scalerMib2gib(g.MemTotal)),
+		fmt.Sprintf("%.1f", g.DiskFree),
+		fmt.Sprintf("%.1f", g.DiskTotal),
+	}
+}
+
 // gangliaMemdisk implements the gangliaResource interface for getting and reporting memory and disk resources.
 type gangliaMemdisk struct {
 	Host  string
 	Free  float64
 	Total float64
+}
+
+func (g gangliaMemdisk) Parse(reader *csv.Reader) (gangliaResource, error) {
+
+	record, err := reader.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(record) < 3 {
+		return nil, fmt.Errorf("invalid data record: %+v", record)
+	}
+
+	r := gangliaMemdisk{}
+
+	r.Host = record[0]
+	if r.Free, err = strconv.ParseFloat(record[1], 64); err != nil {
+		return nil, err
+	}
+	if r.Total, err = strconv.ParseFloat(record[2], 64); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 func (g gangliaMemdisk) GetHostname() string {
@@ -158,6 +263,18 @@ func (g *GangliaDataGetter) GetPrint() error {
 	return nil
 }
 
+// newResource returns a gangaliaResource struct depending on the type of gangliaDataset.
+func (g *GangliaDataGetter) newResource() gangliaResource {
+	switch g.Dataset {
+	case InfoAccessNode:
+		return gangliaSysinfo{}
+	case InfoComputeNode:
+		return gangliaSysinfo{}
+	default:
+		return gangliaMemdisk{}
+	}
+}
+
 // Get retrieves raw data from a ganglia service endpoint, parses the raw data, and
 // turns it into a slice of the gangliaResource data objects.
 func (g *GangliaDataGetter) Get() error {
@@ -191,8 +308,7 @@ func (g *GangliaDataGetter) Get() error {
 	r.TrimLeadingSpace = true
 	r.LazyQuotes = true
 	for {
-		o := gangliaMemdisk{}
-		err := g.parseGangliaRawdata(r, &o)
+		o, err := g.newResource().Parse(r)
 		if err == io.EOF {
 			break
 		}
@@ -207,6 +323,7 @@ func (g *GangliaDataGetter) Get() error {
 
 // Print writes retrieved ganglia resource data in a tabular format.
 func (g *GangliaDataGetter) print() {
+
 	// sort resources by hostname
 	sort.Slice(g.resources, func(i, j int) bool {
 		o := g.resources[j]
@@ -220,44 +337,4 @@ func (g *GangliaDataGetter) print() {
 		table.Append(r.GetTableWriterRowData(gangliaDataScaler[g.Dataset]))
 	}
 	table.Render()
-}
-
-// parseGangliaRawdata reads one record from the csv reader, and parse the data into the given
-// data structure v.
-func (g *GangliaDataGetter) parseGangliaRawdata(reader *csv.Reader, v interface{}) error {
-	record, err := reader.Read()
-	if err != nil {
-		return err
-	}
-
-	s := reflect.ValueOf(v).Elem()
-	if len(record) < s.NumField() {
-		return fmt.Errorf(fmt.Sprintf("expect %d field, got %d: %s", s.NumField(), len(record), record))
-	}
-
-	// reduce record to the expected amount of fields.
-	record = record[0:s.NumField()]
-
-	for i := 0; i < s.NumField(); i++ {
-		f := s.Field(i)
-		switch f.Type().String() {
-		case "string":
-			f.SetString(record[i])
-		case "int64":
-			ival, err := strconv.ParseInt(record[i], 10, 0)
-			if err != nil {
-				return err
-			}
-			f.SetInt(ival)
-		case "float64":
-			fval, err := strconv.ParseFloat(record[i], 64)
-			if err != nil {
-				return err
-			}
-			f.SetFloat(fval)
-		default:
-			return fmt.Errorf("unsupported type: %s", f.Type().String())
-		}
-	}
-	return nil
 }

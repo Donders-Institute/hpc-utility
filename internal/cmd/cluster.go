@@ -13,8 +13,8 @@ import (
 	"sync"
 	"syscall"
 
-	dg "github.com/Donders-Institute/hpc-utility/internal/datagetter"
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
+	dg "github.com/Donders-Institute/hpc-utility/internal/datagetter"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -40,7 +40,7 @@ func init() {
 
 	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd)
+	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, matlabCmd, jobCmd, nodeCmd)
 
@@ -281,6 +281,28 @@ var nodeDiskinfoCmd = &cobra.Command{
 				g.GetPrint()
 			case nodeTypeNames[compute]:
 				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageComputeNode}
+				g.GetPrint()
+			}
+		}
+	},
+}
+
+var nodeInfoCmd = &cobra.Command{
+	Use:       "info {access|compute}",
+	Short:     "Print system load and resource availability of cluster nodes.",
+	Long:      ``,
+	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
+		}
+		for _, n := range args {
+			switch n {
+			case nodeTypeNames[access]:
+				g := dg.GangliaDataGetter{Dataset: dg.InfoAccessNode}
+				g.GetPrint()
+			case nodeTypeNames[compute]:
+				g := dg.GangliaDataGetter{Dataset: dg.InfoComputeNode}
 				g.GetPrint()
 			}
 		}
