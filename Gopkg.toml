@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/Donders-Institute/hpc-torque-helper"
-  version = "1.2.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
