@@ -11,6 +11,7 @@
   hosts:
     - pbs_mom
     - mentat
+    - mgt
   vars_prompt:
     - name: rel_version
       prompt: RPM version to deply
@@ -20,7 +21,7 @@
     - set_fact:
         release: "{{rel_version}}"
 
-- hosts: pbs_mom:mentat
+- hosts: pbs_mom:mentat:mgt
   become: yes
   tasks:
     - name: check existence of the RPMs
