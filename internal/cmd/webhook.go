@@ -150,7 +150,7 @@ var triggerCmd = &cobra.Command{
 				log.Fatalln(err)
 			}
 			if !fi.Mode().IsRegular() {
-				log.Fatalln("not a regular file: %s\n", payloadAbs)
+				log.Fatalf("not a regular file: %s\n", payloadAbs)
 			}
 			dataPayload, err = ioutil.ReadFile(payloadAbs)
 			if err != nil {
