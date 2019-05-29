@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -28,7 +29,9 @@ const (
 
 // variable may be set at the build time to fix the default location for the TorqueHelper server certificate.
 var defTorqueHelperCert string
+var defMachineListFile string
 var vncUser string
+var vncMachineListFile string
 
 func init() {
 
@@ -39,6 +42,7 @@ func init() {
 	clusterCmd.PersistentFlags().StringVarP(&TorqueHelperCert, "cert", "c", defTorqueHelperCert, "Torque helper service certificate")
 
 	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
+	nodeVncCmd.Flags().StringVarP(&vncMachineListFile, "machine-list", "l", defMachineListFile, "path to the machinelist file")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -335,14 +339,14 @@ var nodeInfoCmd = &cobra.Command{
 }
 
 var nodeVncCmd = &cobra.Command{
-	Use:   "vnc {hostname}",
+	Use:   "vnc [{host1} {host2} ...]",
 	Short: "Print list of VNC servers on the cluster or a specific node.",
 	Long: `Print list of VNC servers on the cluster or a specific node.
 
 If the {hostname} is specified, only the VNCs on the node will be shown.
 
 When the username is specified by the "-u" option, only the VNCs owned by the user will be shown.`,
-	Args: cobra.MaximumNArgs(1),
+	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		nodes := make(chan string, 4)
@@ -389,7 +393,9 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 
 		// filling access node hosts
 		go func() {
-			// sort nodes
+			var mlist []string
+
+			// 1. read machinelist from user provided hosts from commandline arguments
 			sort.Strings(args)
 			for _, n := range args {
 
@@ -398,9 +404,30 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 				}
 
 				log.Debugf("add node %s\n", n)
-				nodes <- n
+				mlist = append(mlist, n)
 			}
-			if len(args) == 0 {
+
+			// 2. read machinelist from the machinelist file
+			if len(mlist) == 0 {
+				// read nodes from user provided machinelist
+
+				if fml, err := os.Open(vncMachineListFile); err == nil {
+					defer fml.Close()
+					scanner := bufio.NewScanner(fml)
+					for scanner.Scan() {
+						mlist = append(mlist, scanner.Text())
+					}
+
+					if err := scanner.Err(); err != nil {
+						log.Warnln(err)
+					}
+				} else {
+					log.Warnln(err)
+				}
+			}
+
+			// 3. read machinelist from the Gangalia
+			if len(mlist) == 0 {
 				// TODO: append hostname of all of the access nodes.
 				accs, err := dg.GetAccessNodes()
 				// sort nodes
@@ -408,9 +435,13 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 				if err != nil {
 					log.Errorln(err)
 				}
-				for _, n := range accs {
-					nodes <- n
-				}
+
+				mlist = append(mlist, accs...)
+			}
+
+			// fill mlist to node channel
+			for _, n := range mlist {
+				nodes <- n
 			}
 			close(nodes)
 		}()

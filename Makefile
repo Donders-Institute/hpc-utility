@@ -8,6 +8,7 @@ CACERTDIR ?= "/etc/pki/tls/certs"
 
 GOLDFLAGS = "-X github.com/Donders-Institute/hpc-utility/internal/cmd.defTorqueHelperCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt \
 -X github.com/Donders-Institute/hpc-utility/internal/cmd.defWebhookCert=/etc/pki/tls/certs/star_dccn_nl.chained.crt \
+-X github.com/Donders-Institute/hpc-utility/internal/cmd.defMachineListFile=/opt/cluster/etc/machines.mentat \
 -X github.com/Donders-Institute/hpc-utility/internal/cmd.defVersion=$(VERSION)"
 
 all: build
