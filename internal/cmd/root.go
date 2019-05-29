@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+// version is the CLI version string.
+// It is a placeholder with value to be defined (with -X flag) during the code ompilation.
+var defVersion string
 
 // Verbose is the flag to switch on/off the verbosed output of commands.
 var Verbose bool
@@ -56,6 +61,7 @@ __custom_func() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringVarP(&NetDomain, "domain", "d", "dccn.nl", "default network domain")
+	rootCmd.AddCommand(versionCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -68,6 +74,16 @@ var rootCmd = &cobra.Command{
 		}
 	},
 	BashCompletionFunction: funcBashCompletion,
+}
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print CLI version.",
+	Long:  ``,
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("HPC utility version: %s\n", defVersion)
+	},
 }
 
 // Execute is the main entry point of the cluster command.
