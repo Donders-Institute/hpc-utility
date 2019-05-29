@@ -7,20 +7,31 @@
 #     $ ansible-playbook ansible.yml -K
 #
 ###############################################################################
+- name: set version number
+  hosts:
+    - pbs_mom
+    - mentat
+  vars_prompt:
+    - name: rel_version
+      prompt: RPM version to deply
+      default: 0.5.0-1.el7.x86_64
+      private: no
+  tasks:
+    - set_fact:
+        release: "{{rel_version}}"
+
 - hosts: pbs_mom:mentat
   become: yes
-  vars:
-    release: 0.4.0-1.el7.x86_64
   tasks:
     - name: check existence of the RPMs
       register: ls
-      shell: ls -l
+      shell: ls -l hpc-utility-{{ release | mandatory }}.rpm
       args:
-        chdir: /mnt/install/kickstart-7/miscpkgs/torque-helper/
+        chdir: /mnt/install/kickstart-7/miscpkgs/torque-helper
     #- debug: var=ls.stdout_lines
     - name: install/update hpc-utility package
       register: yum
       yum:
-        name: /mnt/install/kickstart-7/miscpkgs/torque-helper/hpc-utility-{{ release }}.rpm
+        name: /mnt/install/kickstart-7/miscpkgs/torque-helper/hpc-utility-{{ release | mandatory }}.rpm
         state: present
     #- debug: var=yum.results
