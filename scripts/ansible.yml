@@ -8,6 +8,7 @@
 #
 ###############################################################################
 - name: set version number
+  gather_facts: false
   hosts:
     - pbs_mom
     - mentat
@@ -22,6 +23,7 @@
         release: "{{rel_version}}"
 
 - hosts: pbs_mom:mentat:mgt
+  gather_facts: false
   become: yes
   tasks:
     - name: check existence of the RPMs
