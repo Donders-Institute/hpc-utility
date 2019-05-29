@@ -109,6 +109,7 @@ var matlabCmd = &cobra.Command{
 
 		rePkg := regexp.MustCompile(`^Users of (\S+):  \(Total of (\d+) licenses issued;  Total of (\d+) licenses in use\)$`)
 		reUse := regexp.MustCompile(`^\s+(\S+) (\S+).*\((v[0-9]+)\).*, start (.*)$`)
+		reRsv := regexp.MustCompile(`^\s+([0-9]+) RESERVATION[s]{0,1} for (HOST_GROUP|GROUP) (\S+)\s+.*$`)
 
 		var lic matlabLicense
 		var lics []matlabLicense
@@ -146,6 +147,15 @@ var matlabCmd = &cobra.Command{
 				lic.Usages = append(lic.Usages, usage)
 				continue
 			}
+
+			if d := reRsv.FindAllStringSubmatch(line, -1); d != nil {
+				log.Debugf("find package reservation: %s\n", line)
+				if nlics, err := strconv.ParseInt(d[0][1], 10, 0); err == nil {
+					rsv := matlabLicenseReservationInfo{Group: d[0][3], NumberOfLicense: int(nlics)}
+					lic.Reservations = append(lic.Reservations, rsv)
+				}
+				continue
+			}
 		}
 		// print license usages
 		var summaries []string
@@ -156,16 +166,28 @@ var matlabCmd = &cobra.Command{
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"User", "Host", "Version", "Since"})
 			cntLocal := 0
+			cntGlobal := 0
 			for _, usage := range lic.Usages {
 				// TODO: use a better way to filter and present local usage
 				if strings.HasSuffix(strings.ToLower(usage.Host), "dccn.nl") || strings.HasPrefix(strings.ToLower(usage.Host), "dccn") {
 					table.Append([]string{usage.User, usage.Host, usage.Version, usage.Since})
 					cntLocal++
 				}
+				cntGlobal++
+			}
+			for _, rsv := range lic.Reservations {
+				if strings.Contains(strings.ToLower(rsv.Group), "dccn") {
+					// expand reserved licenses by the number of reservation, is it a good representation??
+					for i := 0; i < rsv.NumberOfLicense; i++ {
+						table.Append([]string{rsv.Group, "reservation", "", ""})
+					}
+					cntLocal += rsv.NumberOfLicense
+				}
+				cntGlobal += rsv.NumberOfLicense
 			}
 
 			if cntLocal > 0 {
-				s := fmt.Sprintf("package %s: %d of %d in use (%d by dccn users)", lic.Package, len(lic.Usages), lic.Total, cntLocal)
+				s := fmt.Sprintf("package %s: %d of %d in use (%d by dccn users)", lic.Package, cntGlobal, lic.Total, cntLocal)
 				summaries = append(summaries, s)
 				fmt.Fprintf(os.Stdout, "\n%s\n", s)
 				table.Render()
@@ -447,9 +469,10 @@ func execCmd(cmdName string, cmdArgs []string) (stdout, stderr bytes.Buffer, ec 
 // matlabLicense defines data structure of matlab license information and usage parsed from the
 // `lmstat -a` command.
 type matlabLicense struct {
-	Package string
-	Total   int
-	Usages  []matlabLicenseUsageInfo
+	Package      string
+	Total        int
+	Usages       []matlabLicenseUsageInfo
+	Reservations []matlabLicenseReservationInfo
 }
 
 // matlabLicenseUsageInfo defines data structure of a matlab license that is in use.
@@ -458,4 +481,13 @@ type matlabLicenseUsageInfo struct {
 	Host    string
 	Version string
 	Since   string
+}
+
+// matlabLicenseReservationInfo defines data structure of matlab license reservation.
+//
+// Note: the reservation is counted as actual usage regardless whether the reservation
+//       is actually being used.
+type matlabLicenseReservationInfo struct {
+	Group           string
+	NumberOfLicense int
 }
