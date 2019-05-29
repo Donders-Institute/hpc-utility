@@ -398,11 +398,9 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 			// 1. read machinelist from user provided hosts from commandline arguments
 			sort.Strings(args)
 			for _, n := range args {
-
 				if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
 					n = fmt.Sprintf("%s.%s", n, NetDomain)
 				}
-
 				log.Debugf("add node %s\n", n)
 				mlist = append(mlist, n)
 			}
@@ -415,7 +413,11 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					defer fml.Close()
 					scanner := bufio.NewScanner(fml)
 					for scanner.Scan() {
-						mlist = append(mlist, scanner.Text())
+						n := scanner.Text()
+						if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
+							n = fmt.Sprintf("%s.%s", n, NetDomain)
+						}
+						mlist = append(mlist, n)
 					}
 
 					if err := scanner.Err(); err != nil {
