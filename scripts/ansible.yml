@@ -26,11 +26,14 @@
   gather_facts: false
   become: yes
   tasks:
-    - name: check existence of the RPMs
-      register: ls
-      shell: ls -l hpc-utility-{{ release | mandatory }}.rpm
-      args:
-        chdir: /mnt/install/kickstart-7/miscpkgs/torque-helper
+    - name: check RPM file on nodes
+      stat:
+        path: /mnt/install/kickstart-7/miscpkgs/torque-helper/hpc-utility-{{ release | mandatory }}.rpm
+      register: rpmfile
+    - name: fail on RPM file not available
+      fail:
+        msg: "rpm not found: /mnt/install/kickstart-7/miscpkgs/torque-helper/hpc-utility-{{ release | mandatory }}.rpm"
+      when: rpmfile.stat.exists == False
     #- debug: var=ls.stdout_lines
     - name: install/update hpc-utility package
       register: yum
