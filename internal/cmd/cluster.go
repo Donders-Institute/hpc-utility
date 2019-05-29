@@ -176,13 +176,16 @@ var matlabCmd = &cobra.Command{
 				cntGlobal++
 			}
 			for _, rsv := range lic.Reservations {
-				if strings.Contains(strings.ToLower(rsv.Group), "dccn") {
-					// expand reserved licenses by the number of reservation, is it a good representation??
-					for i := 0; i < rsv.NumberOfLicense; i++ {
-						table.Append([]string{rsv.Group, "reservation", "", ""})
-					}
-					cntLocal += rsv.NumberOfLicense
-				}
+				// NOTE: do not count the reservation as part of the DCCN user usage.
+				//       this is compatible with the old cluster-matlab script.
+				//
+				// if strings.Contains(strings.ToLower(rsv.Group), "dccn") {
+				// 	// expand reserved licenses by the number of reservation, is it a good representation??
+				// 	for i := 0; i < rsv.NumberOfLicense; i++ {
+				// 		table.Append([]string{rsv.Group, "reservation", "", ""})
+				// 	}
+				// 	cntLocal += rsv.NumberOfLicense
+				// }
 				cntGlobal += rsv.NumberOfLicense
 			}
 
