@@ -393,7 +393,9 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 
 		// filling access node hosts
 		go func() {
-			var mlist []string
+
+			// counter for number of nodes to visit
+			mcnt := 0
 
 			// 1. read machinelist from user provided hosts from commandline arguments
 			sort.Strings(args)
@@ -402,11 +404,12 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					n = fmt.Sprintf("%s.%s", n, NetDomain)
 				}
 				log.Debugf("add node %s\n", n)
-				mlist = append(mlist, n)
+				nodes <- n
+				mcnt++
 			}
 
 			// 2. read machinelist from the machinelist file
-			if len(mlist) == 0 {
+			if mcnt == 0 {
 				// read nodes from user provided machinelist
 
 				if fml, err := os.Open(vncMachineListFile); err == nil {
@@ -417,7 +420,8 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 						if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
 							n = fmt.Sprintf("%s.%s", n, NetDomain)
 						}
-						mlist = append(mlist, n)
+						nodes <- n
+						mcnt++
 					}
 
 					if err := scanner.Err(); err != nil {
@@ -429,7 +433,7 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 			}
 
 			// 3. read machinelist from the Gangalia
-			if len(mlist) == 0 {
+			if mcnt == 0 {
 				// TODO: append hostname of all of the access nodes.
 				accs, err := dg.GetAccessNodes()
 				// sort nodes
@@ -438,28 +442,20 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					log.Errorln(err)
 				}
 
-				mlist = append(mlist, accs...)
+				for _, n := range accs {
+					nodes <- n
+				}
 			}
 
-			// fill mlist to node channel
-			for _, n := range mlist {
-				nodes <- n
-			}
+			// close the nodes channel
 			close(nodes)
 		}()
 
 		// reorganise internal data structure for sorting
 		var _vncs []trqhelper.VNCServer
-		for d := range vncservers {
-			_vncs = append(_vncs, d)
-		}
 
-		// sort _vncs and make tabluar display on stdout
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Username", "VNC session"})
-
-		sort.Slice(_vncs, func(i, j int) bool {
-
+		// function for sorting VNC sessions by host.
+		vncSortByHost := func(i, j int) bool {
 			datai := strings.Split(_vncs[i].ID, ":")
 			dataj := strings.Split(_vncs[j].ID, ":")
 
@@ -474,8 +470,17 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 			idj, _ := strconv.ParseUint(dataj[1], 10, 32)
 
 			return idi < idj
-		})
+		}
 
+		for d := range vncservers {
+			_vncs = append(_vncs, d)
+			// perform sorting when a vnc session is added to the list.
+			sort.Slice(_vncs, vncSortByHost)
+		}
+
+		// sort _vncs and make tabluar display on stdout
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Username", "VNC session"})
 		for _, vnc := range _vncs {
 			table.Append([]string{vnc.Owner, vnc.ID})
 		}
