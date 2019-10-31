@@ -41,6 +41,11 @@
   name = "github.com/spf13/cobra"
   version = "0.0.3"
 
+# https://github.com/spf13/cobra/issues/917
+[[override]]
+  name = "github.com/russross/blackfriday"
+  version = "1.5.2"
+
 [prune]
   go-tests = true
   unused-packages = true
