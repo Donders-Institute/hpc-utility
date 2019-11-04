@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -61,7 +62,7 @@ __custom_func() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringVarP(&NetDomain, "domain", "d", "dccn.nl", "default network domain")
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(versionCmd, availCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -84,6 +85,36 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("HPC utility version: %s\n", defVersion)
 	},
+}
+
+var availCmd = &cobra.Command{
+	Use: "avail",
+	Short: "Print availab sub-commands.",
+	Long: ``,
+	Args: cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetRowLine(true)
+		// TODO: SetColMinWidth doesn't automatically wrap the long string accordingly.
+		//table.SetColMinWidth(1,40)
+		table.SetHeader([]string{"Command", "Description"})
+		table.SetRowSeparator("-")
+		addCommandUseToTable(rootCmd, "", table)
+		table.SetColWidth(40)
+		table.Render()
+	},
+}
+
+// addCommandUseToTable addes recursively command's and sub-commands' `Use` and `Short` to a 
+// `tablewritter.Table`.
+func addCommandUseToTable(cmd *cobra.Command, parentUse string, table *tablewriter.Table) {
+	for _, c := range cmd.Commands() {
+		table.Append([]string{
+			fmt.Sprintf("%s %s %s", parentUse, cmd.Use, c.Use),
+			c.Short,
+		})
+		addCommandUseToTable(c, fmt.Sprintf("%s %s", parentUse, cmd.Use), table)
+	}
 }
 
 // Execute is the main entry point of the cluster command.
