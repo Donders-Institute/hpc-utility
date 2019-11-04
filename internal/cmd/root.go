@@ -100,7 +100,6 @@ var availCmd = &cobra.Command{
 		table.SetHeader([]string{"Command", "Description"})
 		table.SetRowSeparator("-")
 		addCommandUseToTable(rootCmd, "", table)
-		table.SetColWidth(40)
 		table.Render()
 	},
 }
@@ -109,10 +108,14 @@ var availCmd = &cobra.Command{
 // `tablewritter.Table`.
 func addCommandUseToTable(cmd *cobra.Command, parentUse string, table *tablewriter.Table) {
 	for _, c := range cmd.Commands() {
-		table.Append([]string{
-			fmt.Sprintf("%s %s %s", parentUse, cmd.Use, c.Use),
-			c.Short,
-		})
+
+		// only prints the command itself if there is no further sub-commands
+		if len(c.Commands()) == 0 {
+			table.Append([]string{
+				fmt.Sprintf("%s %s %s", parentUse, cmd.Use, c.Use),
+				c.Short,
+			})
+		}
 		addCommandUseToTable(c, fmt.Sprintf("%s %s", parentUse, cmd.Use), table)
 	}
 }

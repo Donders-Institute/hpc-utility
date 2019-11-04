@@ -216,9 +216,12 @@ var jobCmd = &cobra.Command{
 }
 
 var jobTraceCmd = &cobra.Command{
-	Use:   "trace [JobID]",
-	Short: "Print job's trace log available on the Torque server.",
-	Long:  ``,
+	Use:   "trace [id]",
+	Short: "Print trace log of a job.",
+	Long:  `Print trace log of a job retrieved from the Torque server.
+
+Only the trace log recorded in the last 3 days will be shown.
+`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c := trqhelper.TorqueHelperSrvClient{
@@ -233,7 +236,7 @@ var jobTraceCmd = &cobra.Command{
 }
 
 var jobMeminfoCmd = &cobra.Command{
-	Use:   "meminfo [JobID]",
+	Use:   "meminfo [id]",
 	Short: "Print memory usage of a running job.",
 	Long:  ``,
 	Args:  cobra.MinimumNArgs(1),
@@ -273,8 +276,8 @@ var nodeCmd = &cobra.Command{
 }
 
 var nodeMeminfoCmd = &cobra.Command{
-	Use:       "memfree {access|compute}",
-	Short:     "Print total and free memory on the cluster nodes.",
+	Use:       "memfree [access|compute]",
+	Short:     "Print total and free memory of cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -295,8 +298,8 @@ var nodeMeminfoCmd = &cobra.Command{
 }
 
 var nodeDiskinfoCmd = &cobra.Command{
-	Use:       "diskfree {access|compute}",
-	Short:     "Print total and free disk space of the cluster nodes.",
+	Use:       "diskfree [access|compute]",
+	Short:     "Print total and free disk space of cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -317,7 +320,7 @@ var nodeDiskinfoCmd = &cobra.Command{
 }
 
 var nodeInfoCmd = &cobra.Command{
-	Use:       "info {access|compute}",
+	Use:       "info [access|compute]",
 	Short:     "Print system load and resource availability of cluster nodes.",
 	Long:      ``,
 	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
@@ -339,9 +342,9 @@ var nodeInfoCmd = &cobra.Command{
 }
 
 var nodeVncCmd = &cobra.Command{
-	Use:   "vnc [{host1} {host2} ...]",
-	Short: "Print list of VNC servers on the cluster or a specific node.",
-	Long: `Print list of VNC servers on the cluster or a specific node.
+	Use:   "vnc [host1 host2 ...]",
+	Short: "Print VNC servers in the cluster or on specific nodes.",
+	Long: `Print VNC servers in the cluster or on specific nodes.
 
 If the {hostname} is specified, only the VNCs on the node will be shown.
 

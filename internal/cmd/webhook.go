@@ -42,7 +42,7 @@ var webhookCmd = &cobra.Command{
 }
 
 var createCmd = &cobra.Command{
-	Use:   "create [ScriptPath]",
+	Use:   "create [path]",
 	Short: "Create a new webhook.",
 	Long:  ``,
 	Args: func(cmd *cobra.Command, args []string) error {
