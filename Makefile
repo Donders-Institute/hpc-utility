@@ -31,8 +31,8 @@ build:
 doc:
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) godoc -http=:6060
 
-test: build_dep
-	@GOPATH=$(GOPATH) GOOS=$(GOOS) GOCACHE=off go test \
+test:
+	@GOPATH=$(GOPATH) GOOS=$(GOOS) go test \
 	-ldflags $(GOLDFLAGS) -v github.com/Donders-Institute/hpc-utility/...
 
 install: build
