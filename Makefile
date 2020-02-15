@@ -1,8 +1,18 @@
+ifndef GOPATH
+	GOPATH := $(HOME)/go
+endif
+
+ifndef GOOS
+	GOOS := linux
+endif
+
+ifndef GO111MODULE
+	GO111MODULE := on
+endif
+
 PREFIX ?= "/opt/cluster"
 
 VERSION ?= "master"
-
-GOOS ?= "linux"
 
 CACERTDIR ?= "/etc/pki/tls/certs"
 
@@ -11,21 +21,12 @@ GOLDFLAGS = "-X github.com/Donders-Institute/hpc-utility/internal/cmd.defTorqueH
 -X github.com/Donders-Institute/hpc-utility/internal/cmd.defMachineListFile=/opt/cluster/etc/machines.mentat \
 -X github.com/Donders-Institute/hpc-utility/internal/cmd.defVersion=$(VERSION)"
 
+.PHONY: build
+
 all: build
 
-$(GOPATH)/bin/dep:
-	mkdir -p $(GOPATH)/bin
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | GOPATH=$(GOPATH) GOOS=linux sh
-
-build_dep: $(GOPATH)/bin/dep
-	GOPATH=$(GOPATH) GOOS=$(GOOS) $(GOPATH)/bin/dep ensure
-
-update_dep: $(GOPATH)/bin/dep
-	GOPATH=$(GOPATH) GOOS=$(GOOS) $(GOPATH)/bin/dep ensure --update
-
-build: build_dep
-	GOPATH=$(GOPATH) GOOS=$(GOOS) GOLDFLAGS=$(GOLDFLAGS) go install \
-	-ldflags $(GOLDFLAGS) -v github.com/Donders-Institute/hpc-utility/...
+build:
+	GOPATH=$(GOPATH) GOOS=$(GOOS) GO111MODULE=$(GO111MODULE) GOLDFLAGS=$(GOLDFLAGS) go install -ldflags $(GOLDFLAGS) github.com/Donders-Institute/hpc-utility/...
 
 doc:
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) godoc -http=:6060
