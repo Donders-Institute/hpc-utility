@@ -28,7 +28,7 @@ rm -rf %{gopath}
 mkdir -p %{gopath}/src/github.com/Donders-Institute
 # copy entire directory into gopath, this duplicate the source code
 cp -R %{_builddir}/%{name}-%{version} %{gopath}/src/github.com/Donders-Institute/%{name}
-cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; %{gopath}/bin/hpcutil-gbc > hpcutil
+cd %{gopath}/src/github.com/Donders-Institute/%{name}; GOPATH=%{gopath} make; GOPATH=%{gopath} go clean --modcache; %{gopath}/bin/hpcutil-gbc > hpcutil
 
 %install
 mkdir -p %{buildroot}/%{_bindir}
