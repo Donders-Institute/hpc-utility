@@ -26,7 +26,7 @@ GOLDFLAGS = "-X github.com/Donders-Institute/hpc-utility/internal/cmd.defTorqueH
 all: build
 
 build:
-	GOPATH=$(GOPATH) GOOS=$(GOOS) GO111MODULE=$(GO111MODULE) GOLDFLAGS=$(GOLDFLAGS) go install -ldflags $(GOLDFLAGS) github.com/Donders-Institute/hpc-utility/...
+	GOPATH=$(GOPATH) GOOS=$(GOOS) GO111MODULE=$(GO111MODULE) go install -ldflags $(GOLDFLAGS) github.com/Donders-Institute/hpc-utility/...
 
 doc:
 	@GOPATH=$(GOPATH) GOOS=$(GOOS) godoc -http=:6060
