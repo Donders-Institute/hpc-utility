@@ -59,7 +59,7 @@ func init() {
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
-	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "feature", "", strings.Join(nodeResourceDefFeatures, ","), "toggle display of node features")
+	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "features", "", "", "toggle display of node features by specifying a comma-separated features.")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
