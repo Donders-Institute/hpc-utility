@@ -434,6 +434,11 @@ var nodeStatusCmd = &cobra.Command{
 			_nodes = append(_nodes, n)
 		}
 
+		// sorts by node's hostname
+		sort.Slice(_nodes, func(i, j int) bool {
+			return _nodes[i].ID < _nodes[j].ID
+		})
+
 		// sort _nodes and make tabluar display on stdout
 		table := tablewriter.NewWriter(os.Stdout)
 
