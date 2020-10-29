@@ -17,6 +17,10 @@ github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20O
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028105153-70e044f35b15 h1:twzReWO0lvrOwykQGxGV1lU8fjInyDML6KmP82vV4Ls=
 github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028105153-70e044f35b15/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028165938-77d3e62ad953 h1:+ejugDJqPD2vAP1dO1nCTeEWIT1o5IYWdfFlVVigeNY=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028165938-77d3e62ad953/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029083023-ca653743e14d h1:g2x3E0BkIh6D682EpWySLG/QJp2r/2GRpvsWkSXq9xE=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029083023-ca653743e14d/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
 github.com/Donders-Institute/hpc-webhook v0.2.2-0.20190329122908-3fddb5836efe h1:9Jo1v6LLoRLLPm0xsX2ZxwKVsbxigx1eZSt6CXBIpuM=
 github.com/Donders-Institute/hpc-webhook v0.2.2-0.20190329122908-3fddb5836efe/go.mod h1:DYTgS3Q/6/anM3vCJpA9lk8Djabq99uW27OFp2jLZIk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=

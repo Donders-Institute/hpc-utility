@@ -44,7 +44,7 @@ func init() {
 	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
 	nodeVncCmd.Flags().StringVarP(&vncMachineListFile, "machine-list", "l", defMachineListFile, "path to the machinelist file")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd)
+	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, matlabCmd, jobCmd, nodeCmd)
 
@@ -218,11 +218,11 @@ var jobCmd = &cobra.Command{
 var jobTraceCmd = &cobra.Command{
 	Use:   "trace [id]",
 	Short: "Print trace log of a job.",
-	Long:  `Print trace log of a job retrieved from the Torque server.
+	Long: `Print trace log of a job retrieved from the Torque server.
 
 Only the trace log recorded in the last 3 days will be shown.
 `,
-	Args:  cobra.MinimumNArgs(1),
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		c := trqhelper.TorqueHelperSrvClient{
 			SrvHost:     TorqueServerHost,
@@ -338,6 +338,93 @@ var nodeInfoCmd = &cobra.Command{
 				g.GetPrint()
 			}
 		}
+	},
+}
+
+var nodeStatusCmd = &cobra.Command{
+	Use:   "status [host1 node2 ...]",
+	Short: "Print resource status of a compute node or all compute nodes.",
+	Long:  ``,
+	Args:  cobra.ArbitraryArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			args = []string{"ALL"}
+		}
+
+		hosts := make(chan string, 4)
+		nodes := make(chan trqhelper.NodeResourceStatus)
+
+		// worker group
+		wg := new(sync.WaitGroup)
+		nworker := 4
+		wg.Add(nworker)
+
+		// torque helper client shared by go routines
+		c := trqhelper.TorqueHelperSrvClient{
+			SrvPort:     TorqueHelperPort,
+			SrvCertFile: TorqueHelperCert,
+		}
+
+		for i := 0; i < nworker; i++ {
+			go func() {
+				for h := range hosts {
+					log.Debugf("work on %s", h)
+					resources, err := c.GetNodeResourceStatus(h)
+					if err != nil {
+						log.Errorf("%s: %s", c.SrvHost, err)
+					}
+
+					for _, r := range resources {
+						if r.ID != "GLOBAL" {
+							nodes <- r
+						}
+					}
+				}
+
+				log.Debugln("worker is about to leave")
+				wg.Done()
+			}()
+		}
+
+		// filling up hosts
+		go func() {
+			for _, h := range args {
+				hosts <- h
+			}
+			close(hosts)
+		}()
+
+		// wait for all workers to finish
+		go func() {
+			wg.Wait()
+			close(nodes)
+		}()
+
+		// reorganise internal data structure for sorting
+		var _nodes []trqhelper.NodeResourceStatus
+		for n := range nodes {
+			_nodes = append(_nodes, n)
+		}
+
+		// sort _nodes and make tabluar display on stdout
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader(
+			[]string{
+				"hostname",
+				"state",
+				"networkGbps",
+			},
+		)
+		for _, n := range _nodes {
+			table.Append(
+				[]string{
+					n.ID,
+					n.State,
+					fmt.Sprintf("%d", n.NetworkGbps),
+				},
+			)
+		}
+		table.Render()
 	},
 }
 
