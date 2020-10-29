@@ -39,7 +39,9 @@ var nodeResourceShowProcs bool
 var nodeResourceShowGpus bool
 var nodeResourceShowMemGB bool
 var nodeResourceShowDiskGB bool
-var nodeResourceShowFeatures bool
+var nodeResourceShowFeatures string
+
+var nodeResourceDefFeatures []string = []string{"matlab", "cuda", "vgl", "lcmodel"}
 
 func init() {
 
@@ -57,7 +59,7 @@ func init() {
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
-	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowFeatures, "feature", "", false, "toggle display of node features")
+	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "feature", "", strings.Join(nodeResourceDefFeatures, ","), "toggle display of node features")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -368,7 +370,7 @@ var nodeStatusCmd = &cobra.Command{
 			nodeResourceShowGpus = true
 			nodeResourceShowMemGB = true
 			nodeResourceShowDiskGB = true
-			nodeResourceShowFeatures = true
+			nodeResourceShowFeatures = strings.Join(nodeResourceDefFeatures, ",")
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -454,7 +456,7 @@ var nodeStatusCmd = &cobra.Command{
 		if nodeResourceShowDiskGB {
 			headers = append(headers, "diskgb\n(avail/total)")
 		}
-		if nodeResourceShowFeatures {
+		if nodeResourceShowFeatures != "" {
 			headers = append(headers, "features")
 		}
 		table.SetHeader(headers)
@@ -504,8 +506,14 @@ var nodeStatusCmd = &cobra.Command{
 			}
 
 			// features
-			if nodeResourceShowFeatures {
-				rdata = append(rdata, strings.Join(n.Features, "\n"))
+			if nodeResourceShowFeatures != "" {
+				features := []string{}
+				for _, f := range n.Features {
+					if strings.Index(nodeResourceShowFeatures, f) >= 0 {
+						features = append(features, f)
+					}
+				}
+				rdata = append(rdata, strings.Join(features, "\n"))
 			}
 
 			table.Append(rdata)
@@ -513,6 +521,9 @@ var nodeStatusCmd = &cobra.Command{
 
 		table.SetHeaderAlignment(tablewriter.ALIGN_CENTER)
 		table.SetAlignment(tablewriter.ALIGN_RIGHT)
+		if nodeResourceShowFeatures != "" {
+			table.SetRowLine(true)
+		}
 		table.Render()
 	},
 }
