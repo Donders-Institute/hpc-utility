@@ -54,12 +54,12 @@ func init() {
 	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
 	nodeVncCmd.Flags().StringVarP(&vncMachineListFile, "machine-list", "l", defMachineListFile, "path to the machinelist file")
 
-	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowAll, "all", "", false, "show full node status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowAll, "all", "", false, "show all node resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowProcs, "procs", "", false, "toggle display of CPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
-	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "features", "", "", "toggle display of node features by specifying a comma-separated features.")
+	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "features", "", "", "toggle display of selected node features specified by a comma-separated list.")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -360,7 +360,7 @@ var nodeInfoCmd = &cobra.Command{
 
 var nodeStatusCmd = &cobra.Command{
 	Use:   "status [host1 node2 ...]",
-	Short: "Print resource status of a compute node or all compute nodes.",
+	Short: "Print resource status of all or the specified compute nodes.",
 	Long:  ``,
 	Args:  cobra.ArbitraryArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
