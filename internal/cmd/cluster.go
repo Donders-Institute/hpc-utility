@@ -359,7 +359,7 @@ var nodeInfoCmd = &cobra.Command{
 }
 
 var nodeStatusCmd = &cobra.Command{
-	Use:   "status [host1 node2 ...]",
+	Use:   "status [node1 node2 ...]",
 	Short: "Print resource status of all or the specified compute nodes.",
 	Long:  ``,
 	Args:  cobra.ArbitraryArgs,
