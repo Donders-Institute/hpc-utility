@@ -450,16 +450,16 @@ var nodeStatusCmd = &cobra.Command{
 			"netbw",
 		}
 		if nodeResourceShowProcs {
-			headers = append(headers, "ncores\n(avail/total)")
+			headers = append(headers, "procs\n(avail/total)")
 		}
 		if nodeResourceShowGpus {
-			headers = append(headers, "ngpus\n(avail/total)")
+			headers = append(headers, "gpus\n(avail/total)")
 		}
 		if nodeResourceShowMemGB {
-			headers = append(headers, "memgb\n(avail/total)")
+			headers = append(headers, "mem [gb]\n(avail/total)")
 		}
 		if nodeResourceShowDiskGB {
-			headers = append(headers, "diskgb\n(avail/total)")
+			headers = append(headers, "disk [gb]\n(avail/total)")
 		}
 		if nodeResourceShowFeatures != "" {
 			headers = append(headers, "features")
