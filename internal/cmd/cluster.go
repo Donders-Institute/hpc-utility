@@ -33,6 +33,13 @@ var defMachineListFile string
 var vncUser string
 var vncMachineListFile string
 
+// switches for node resource display.
+var nodeResourceShowAll bool
+var nodeResourceShowProcs bool
+var nodeResourceShowGpus bool
+var nodeResourceShowMemGB bool
+var nodeResourceShowDiskGB bool
+
 func init() {
 
 	qstatCmd.Flags().BoolVarP(&xml, "xml", "x", false, "XML output")
@@ -43,6 +50,12 @@ func init() {
 
 	nodeVncCmd.Flags().StringVarP(&vncUser, "user", "u", "", "username of the VNC owner")
 	nodeVncCmd.Flags().StringVarP(&vncMachineListFile, "machine-list", "l", defMachineListFile, "path to the machinelist file")
+
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowAll, "all", "", false, "show full node status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowProcs, "procs", "", false, "toggle display of CPU resource status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -346,6 +359,15 @@ var nodeStatusCmd = &cobra.Command{
 	Short: "Print resource status of a compute node or all compute nodes.",
 	Long:  ``,
 	Args:  cobra.ArbitraryArgs,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// toggle all display switches
+		if nodeResourceShowAll {
+			nodeResourceShowProcs = true
+			nodeResourceShowGpus = true
+			nodeResourceShowMemGB = true
+			nodeResourceShowDiskGB = true
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			args = []string{"ALL"}
@@ -409,21 +431,73 @@ var nodeStatusCmd = &cobra.Command{
 
 		// sort _nodes and make tabluar display on stdout
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader(
-			[]string{
-				"hostname",
-				"state",
-				"networkGbps",
-			},
-		)
+
+		// table headers
+		headers := []string{
+			"hostname",
+			"cpu vendor",
+			"state",
+			"netbw",
+		}
+		if nodeResourceShowProcs {
+			headers = append(headers, "ncore (avail/total)")
+		}
+		if nodeResourceShowGpus {
+			headers = append(headers, "ngpus (avail/total)")
+		}
+		if nodeResourceShowMemGB {
+			headers = append(headers, "memgb (avail/total)")
+		}
+		if nodeResourceShowDiskGB {
+			headers = append(headers, "dskgb (avail/total)")
+		}
+		table.SetHeader(headers)
+
+		// table content
 		for _, n := range _nodes {
-			table.Append(
-				[]string{
-					n.ID,
-					n.State,
-					fmt.Sprintf("%d", n.NetworkGbps),
-				},
-			)
+
+			// id
+			rdata := []string{
+				n.ID,
+			}
+
+			// cpu vendor
+			switch {
+			case n.IsAMD:
+				rdata = append(rdata, "AMD")
+			case n.IsIntel:
+				rdata = append(rdata, "INTEL")
+			default:
+				rdata = append(rdata, "N.A.")
+			}
+
+			// state
+			rdata = append(rdata, n.State)
+
+			// network bandwidth
+			rdata = append(rdata, fmt.Sprintf("%d", n.NetworkGbps))
+
+			// nprocs
+			if nodeResourceShowProcs {
+				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailProcs, n.TotalProcs))
+			}
+
+			// ngpus
+			if nodeResourceShowGpus {
+				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailGPUS, n.TotalGPUS))
+			}
+
+			// memgb
+			if nodeResourceShowMemGB {
+				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailMemGB, n.TotalMemGB))
+			}
+
+			// dskgb
+			if nodeResourceShowDiskGB {
+				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailDiskGB, n.TotalDiskGB))
+			}
+
+			table.Append(rdata)
 		}
 		table.Render()
 	},
