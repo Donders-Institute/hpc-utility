@@ -39,6 +39,7 @@ var nodeResourceShowProcs bool
 var nodeResourceShowGpus bool
 var nodeResourceShowMemGB bool
 var nodeResourceShowDiskGB bool
+var nodeResourceShowFeatures bool
 
 func init() {
 
@@ -56,6 +57,7 @@ func init() {
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
+	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowFeatures, "feature", "", false, "toggle display of node features")
 
 	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
@@ -366,6 +368,7 @@ var nodeStatusCmd = &cobra.Command{
 			nodeResourceShowGpus = true
 			nodeResourceShowMemGB = true
 			nodeResourceShowDiskGB = true
+			nodeResourceShowFeatures = true
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -435,21 +438,24 @@ var nodeStatusCmd = &cobra.Command{
 		// table headers
 		headers := []string{
 			"hostname",
-			"cpu vendor",
+			"cpu\nvendor",
 			"state",
 			"netbw",
 		}
 		if nodeResourceShowProcs {
-			headers = append(headers, "ncore (avail/total)")
+			headers = append(headers, "ncores\n(avail/total)")
 		}
 		if nodeResourceShowGpus {
-			headers = append(headers, "ngpus (avail/total)")
+			headers = append(headers, "ngpus\n(avail/total)")
 		}
 		if nodeResourceShowMemGB {
-			headers = append(headers, "memgb (avail/total)")
+			headers = append(headers, "memgb\n(avail/total)")
 		}
 		if nodeResourceShowDiskGB {
-			headers = append(headers, "dskgb (avail/total)")
+			headers = append(headers, "diskgb\n(avail/total)")
+		}
+		if nodeResourceShowFeatures {
+			headers = append(headers, "features")
 		}
 		table.SetHeader(headers)
 
@@ -477,7 +483,7 @@ var nodeStatusCmd = &cobra.Command{
 			// network bandwidth
 			rdata = append(rdata, fmt.Sprintf("%d", n.NetworkGbps))
 
-			// nprocs
+			// ncores
 			if nodeResourceShowProcs {
 				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailProcs, n.TotalProcs))
 			}
@@ -492,13 +498,21 @@ var nodeStatusCmd = &cobra.Command{
 				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailMemGB, n.TotalMemGB))
 			}
 
-			// dskgb
+			// diskgb
 			if nodeResourceShowDiskGB {
 				rdata = append(rdata, fmt.Sprintf("%d/%d", n.AvailDiskGB, n.TotalDiskGB))
 			}
 
+			// features
+			if nodeResourceShowFeatures {
+				rdata = append(rdata, strings.Join(n.Features, "\n"))
+			}
+
 			table.Append(rdata)
 		}
+
+		table.SetHeaderAlignment(tablewriter.ALIGN_CENTER)
+		table.SetAlignment(tablewriter.ALIGN_RIGHT)
 		table.Render()
 	},
 }
