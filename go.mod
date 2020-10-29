@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
-	github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029083023-ca653743e14d
+	github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029112136-386519635551
 	github.com/Donders-Institute/hpc-webhook v0.2.2-0.20190329122908-3fddb5836efe
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/lib/pq v1.8.0 // indirect

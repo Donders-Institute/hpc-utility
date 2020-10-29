@@ -21,6 +21,12 @@ github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028165938-77d3e62ad95
 github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201028165938-77d3e62ad953/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
 github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029083023-ca653743e14d h1:g2x3E0BkIh6D682EpWySLG/QJp2r/2GRpvsWkSXq9xE=
 github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029083023-ca653743e14d/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029104938-940e9a861e0d h1:boTtEluWZt/kC0evT1kcsV34CVoTr2DtH8dZ+jxHrBc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029104938-940e9a861e0d/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029110835-deee02727dbb h1:sEWmdRLD3h2hF5ahJb6J9pPa1MhGiJj5bjy5/T8yPOc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029110835-deee02727dbb/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029112136-386519635551 h1:I+TlRR2TBaE/OmYrvDyHBd3WIEMJ7SnOk+mWPlXBSzA=
+github.com/Donders-Institute/hpc-torque-helper v0.0.0-20201029112136-386519635551/go.mod h1:AMOCQPjFwi9dAJJkvh21gHQkHal84GpfkNKqWxXK0Hc=
 github.com/Donders-Institute/hpc-webhook v0.2.2-0.20190329122908-3fddb5836efe h1:9Jo1v6LLoRLLPm0xsX2ZxwKVsbxigx1eZSt6CXBIpuM=
 github.com/Donders-Institute/hpc-webhook v0.2.2-0.20190329122908-3fddb5836efe/go.mod h1:DYTgS3Q/6/anM3vCJpA9lk8Djabq99uW27OFp2jLZIk=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
