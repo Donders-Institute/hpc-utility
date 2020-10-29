@@ -361,6 +361,7 @@ var nodeStatusCmd = &cobra.Command{
 
 		// torque helper client shared by go routines
 		c := trqhelper.TorqueHelperSrvClient{
+			SrvHost:     TorqueServerHost,
 			SrvPort:     TorqueHelperPort,
 			SrvCertFile: TorqueHelperCert,
 		}
