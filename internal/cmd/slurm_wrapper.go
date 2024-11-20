@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// ParseSingleNodeInfo converts the output of `scontrol show node <node>` into
+// parseSingleNodeInfo converts the output of `scontrol show node <node>` into
 // the `trqhelper.NodeResourceStatus` data structure.
 //
 // The expected `out` looks like the one below:
@@ -38,7 +38,7 @@ import (
 //	ExtSensorsJoules=n/s ExtSensorsWatts=0 ExtSensorsTemp=n/s
 //
 // ```
-func ParseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
+func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 
 	info := trqhelper.NodeResourceStatus{}
 
@@ -148,7 +148,7 @@ func ParseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 
 }
 
-func ParseMultipleNodeInfo(out string) []trqhelper.NodeResourceStatus {
+func parseMultipleNodeInfo(out string) []trqhelper.NodeResourceStatus {
 
 	nodes := make([]trqhelper.NodeResourceStatus, 0)
 
@@ -158,7 +158,7 @@ func ParseMultipleNodeInfo(out string) []trqhelper.NodeResourceStatus {
 			continue
 		}
 
-		node, err := ParseSingleNodeInfo(fmt.Sprintf("NodeName=%s", nodeinfo))
+		node, err := parseSingleNodeInfo(fmt.Sprintf("NodeName=%s", nodeinfo))
 		if err != nil {
 			log.Errorf("%s", err)
 			continue
@@ -169,9 +169,20 @@ func ParseMultipleNodeInfo(out string) []trqhelper.NodeResourceStatus {
 	return nodes
 }
 
+// GetNodeInfo makes a system call `scontrol show node` and parse the
+// output into array of `trqhelper.NodeResourceStatus`.
+//
+// If the given argument `id` is a empty string `""“ or `"ALL"`, it will
+// get information of all Slurm nodes.
 func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 
-	stdout, stderr, ec, err := execCmd("scontrol", []string{"show", "node", id})
+	args := []string{"show", "node"}
+
+	if id != "" && id != "ALL" {
+		args = append(args, id)
+	}
+
+	stdout, stderr, ec, err := execCmd("scontrol", args)
 
 	if err != nil {
 		log.Fatalf("%s: exit code %d\n", err, ec)
@@ -188,7 +199,7 @@ func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 
 		if err == io.EOF {
 			if nodeInfo != "" {
-				node, err := ParseSingleNodeInfo(nodeInfo)
+				node, err := parseSingleNodeInfo(nodeInfo)
 
 				if err != nil {
 					log.Errorf("%s", err)
@@ -204,7 +215,7 @@ func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 		}
 
 		if strings.HasPrefix(line, "NodeName=") && nodeInfo != "" {
-			node, err := ParseSingleNodeInfo(nodeInfo)
+			node, err := parseSingleNodeInfo(nodeInfo)
 			if err != nil {
 				log.Errorf("%s", err)
 			}

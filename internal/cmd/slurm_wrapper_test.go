@@ -49,7 +49,7 @@ var (
 
 func TestParseSingleNodeInfo(t *testing.T) {
 	for _, info := range nodeinfo {
-		info, err := ParseSingleNodeInfo(info)
+		info, err := parseSingleNodeInfo(info)
 		if err != nil {
 			t.Fatalf("%s\n", err)
 		}
@@ -60,7 +60,7 @@ func TestParseSingleNodeInfo(t *testing.T) {
 
 func TestParseMultipleNodeInfo(t *testing.T) {
 
-	for _, node := range ParseMultipleNodeInfo(strings.Join(nodeinfo, "\n")) {
+	for _, node := range parseMultipleNodeInfo(strings.Join(nodeinfo, "\n")) {
 		t.Logf("node info: %+v\n", node)
 	}
 
