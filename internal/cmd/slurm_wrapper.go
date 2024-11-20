@@ -222,9 +222,9 @@ func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 			nodes = append(nodes, node)
 
 			// reset nodeInfo
-			nodeInfo = ""
+			nodeInfo = line
 		} else {
-			nodeInfo = fmt.Sprintf("%s%s\n", nodeInfo, line)
+			nodeInfo = fmt.Sprintf("%s%s", nodeInfo, line)
 		}
 	}
 
