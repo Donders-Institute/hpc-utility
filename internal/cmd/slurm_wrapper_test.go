@@ -65,3 +65,15 @@ func TestParseMultipleNodeInfo(t *testing.T) {
 	}
 
 }
+
+func TestGetNodeInfo(t *testing.T) {
+	nodes, err := GetNodeInfo("ALL")
+
+	if err != nil {
+		t.Fatalf("%s\n", err)
+	}
+
+	for _, node := range nodes {
+		t.Logf("node info: %+v\n", node)
+	}
+}
