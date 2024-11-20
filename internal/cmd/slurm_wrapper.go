@@ -81,7 +81,7 @@ func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 				info.Features = append(info.Features, strings.Split(keyValue[1], ",")...)
 
 			case "State":
-				info.State = keyValue[1]
+				info.State = strings.Split(keyValue[1], "+")[0]
 
 			case "Gres":
 				reCpu := regexp.MustCompile(`cpu:(amd|intel):[0-9]+`)
