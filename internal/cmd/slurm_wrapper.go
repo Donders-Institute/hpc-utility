@@ -144,6 +144,11 @@ func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 	info.AvailGPUS = info.TotalGPUS - gpuAllocated
 	info.AvailMemGB = info.TotalMemGB - (memAllocated / 1024)
 
+	// TODO: this should be done dynamically.  Nevertheless, it
+	//       is anyway a static value given that we run purely
+	//       the 10 Gbs network within the Slurm cluster.
+	info.NetworkGbps = 10
+
 	return info, nil
 
 }
