@@ -144,6 +144,12 @@ func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 	info.AvailGPUS = info.TotalGPUS - gpuAllocated
 	info.AvailMemGB = info.TotalMemGB - (memAllocated / 1024)
 
+	// TODO: in Slurm, the TmpDisk is the total node scratch space
+	//       it doesn't tell how much has left; and no quota limit
+	//       at all.
+	//       This should be improved further with the GRES approach.
+	info.AvailDiskGB = info.TotalDiskGB
+
 	// TODO: this should be done dynamically.  Nevertheless, it
 	//       is anyway a static value given that we run purely
 	//       the 10 Gbs network within the Slurm cluster.
