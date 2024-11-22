@@ -2,20 +2,19 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	dg "github.com/Donders-Institute/hpc-utility/internal/datagetter"
+	"github.com/Donders-Institute/hpc-utility/internal/slurm"
+	"github.com/Donders-Institute/hpc-utility/internal/util"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -120,7 +119,7 @@ var matlabCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		stdout, stderr, ec, err := execCmd("lmstat", []string{"-a"})
+		stdout, stderr, ec, err := util.ExecCmd("lmstat", []string{"-a"})
 		if err != nil {
 			log.Fatalf("%s: exit code %d\n", err, ec)
 		}
@@ -414,7 +413,6 @@ var nodeStatusCmd = &cobra.Command{
 			}()
 		}
 
-		// filling up hosts
 		go func() {
 			for _, h := range args {
 				hosts <- h
@@ -422,14 +420,21 @@ var nodeStatusCmd = &cobra.Command{
 			close(hosts)
 		}()
 
-		// wait for all workers to finish
+		// getting slurm node information while waiting for
+		// torque node information
+		var _nodes []trqhelper.NodeResourceStatus
 		go func() {
+			var err error
+			_nodes, err = slurm.GetNodeInfo("ALL")
+			if err != nil {
+				log.Errorf("fail getting slurm node information: %s", err)
+			}
+
 			wg.Wait()
 			close(nodes)
 		}()
 
 		// reorganise internal data structure for sorting
-		var _nodes []trqhelper.NodeResourceStatus
 		for n := range nodes {
 			_nodes = append(_nodes, n)
 		}
@@ -683,25 +688,6 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 	},
 }
 
-// execCmd executes a system call and returns stdout, stderr and exit code of the execution.
-func execCmd(cmdName string, cmdArgs []string) (stdout, stderr bytes.Buffer, ec int32, err error) {
-	// Execute command and catch the stdout and stderr as byte buffer.
-	cmd := exec.Command(cmdName, cmdArgs...)
-	cmd.Env = os.Environ()
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
-	ec = 0
-	if err = cmd.Run(); err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			ws := exitError.Sys().(syscall.WaitStatus)
-			ec = int32(ws.ExitStatus())
-		} else {
-			ec = 1
-		}
-	}
-	return
-}
-
 // matlabLicense defines data structure of matlab license information and usage parsed from the
 // `lmstat -a` command.
 type matlabLicense struct {
@@ -722,7 +708,8 @@ type matlabLicenseUsageInfo struct {
 // matlabLicenseReservationInfo defines data structure of matlab license reservation.
 //
 // Note: the reservation is counted as actual usage regardless whether the reservation
-//       is actually being used.
+//
+//	is actually being used.
 type matlabLicenseReservationInfo struct {
 	Group           string
 	NumberOfLicense int

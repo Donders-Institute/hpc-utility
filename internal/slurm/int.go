@@ -1,4 +1,4 @@
-package cmd
+package slurm
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
+	"github.com/Donders-Institute/hpc-utility/internal/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -193,7 +194,7 @@ func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 		args = append(args, id)
 	}
 
-	stdout, stderr, ec, err := execCmd("scontrol", args)
+	stdout, stderr, ec, err := util.ExecCmd("scontrol", args)
 
 	if err != nil {
 		log.Fatalf("%s: exit code %d\n", err, ec)
