@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -424,11 +425,16 @@ var nodeStatusCmd = &cobra.Command{
 		// getting slurm node information while waiting for
 		// torque node information
 		var _nodes []trqhelper.NodeResourceStatus
+		var _slurmNodeIds []string
 		go func() {
 			var err error
 			_nodes, err = slurm.GetNodeInfo("ALL")
 			if err != nil {
 				log.Errorf("fail getting slurm node information: %s", err)
+			}
+
+			for _, n := range _nodes {
+				_slurmNodeIds = append(_slurmNodeIds, n.ID)
 			}
 
 			wg.Wait()
@@ -450,6 +456,7 @@ var nodeStatusCmd = &cobra.Command{
 
 		// table headers
 		headers := []string{
+			"cluster",
 			"hostname",
 			"cpu\nvendor",
 			"state",
@@ -475,9 +482,15 @@ var nodeStatusCmd = &cobra.Command{
 		// table content
 		for _, n := range _nodes {
 
-			// id
+			// cluster and id
 			rdata := []string{
+				"torque",
 				n.ID,
+			}
+
+			// check if it is a slurm node
+			if slices.Index(_slurmNodeIds, n.ID) >= 0 {
+				rdata[0] = "slurm"
 			}
 
 			// cpu vendor
