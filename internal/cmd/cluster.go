@@ -40,7 +40,8 @@ var nodeResourceShowMemGB bool
 var nodeResourceShowDiskGB bool
 var nodeResourceShowFeatures string
 
-var nodeResourceDefFeatures []string = []string{"matlab", "cuda", "vgl", "lcmodel"}
+// this list of features consists of Torque node features and Slurm partitions
+var nodeResourceDefFeatures []string = []string{"matlab", "cuda", "vgl", "lcmodel", "gpu", "batch", "interactive"}
 
 func init() {
 
