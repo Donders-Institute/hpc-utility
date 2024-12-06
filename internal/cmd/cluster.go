@@ -300,8 +300,9 @@ var nodeStatusCmd = &cobra.Command{
 			args = []string{"ALL"}
 		}
 
-		hosts := make(chan string, 4)
-		nodes := make(chan trqhelper.NodeResourceStatus)
+		hosts := make(chan string, len(args))
+		trqNodes := make(chan trqhelper.NodeResourceStatus)
+		slurmNodes := make(chan trqhelper.NodeResourceStatus)
 
 		// worker group
 		wg := new(sync.WaitGroup)
@@ -319,14 +320,28 @@ var nodeStatusCmd = &cobra.Command{
 			go func() {
 				for h := range hosts {
 					log.Debugf("work on %s", h)
-					resources, err := c.GetNodeResourceStatus(h)
+
+					// slurm resources
+					slurmResources, err := slurm.GetNodeInfo(h)
 					if err != nil {
-						log.Errorf("%s: %s", c.SrvHost, err)
+						log.Errorf("fail get status of %s from Slurm: %s", h, err)
 					}
 
-					for _, r := range resources {
-						if r.ID != "GLOBAL" {
-							nodes <- r
+					for _, r := range slurmResources {
+						slurmNodes <- r
+					}
+
+					// torque trqResources (conditional)
+					if h != "ALL" && len(slurmResources) == 0 {
+						trqResources, err := c.GetNodeResourceStatus(h)
+						if err != nil {
+							log.Errorf("%s: %s", c.SrvHost, err)
+						}
+
+						for _, r := range trqResources {
+							if r.ID != "GLOBAL" {
+								trqNodes <- r
+							}
 						}
 					}
 				}
@@ -336,35 +351,34 @@ var nodeStatusCmd = &cobra.Command{
 			}()
 		}
 
+		for _, h := range args {
+			hosts <- h
+		}
+		close(hosts)
+
+		done := make(chan bool)
 		go func() {
-			for _, h := range args {
-				hosts <- h
-			}
-			close(hosts)
-		}()
-
-		// getting slurm node information while waiting for
-		// torque node information
-		var _nodes []trqhelper.NodeResourceStatus
-		var _slurmNodeIds []string
-		go func() {
-			var err error
-			_nodes, err = slurm.GetNodeInfo("ALL")
-			if err != nil {
-				log.Errorf("fail getting slurm node information: %s", err)
-			}
-
-			for _, n := range _nodes {
-				_slurmNodeIds = append(_slurmNodeIds, n.ID)
-			}
-
 			wg.Wait()
-			close(nodes)
+			close(trqNodes)
+			close(slurmNodes)
+			done <- true
 		}()
 
 		// reorganise internal data structure for sorting
-		for n := range nodes {
-			_nodes = append(_nodes, n)
+		var _nodes []trqhelper.NodeResourceStatus
+		var _trqNodeIds []string
+
+	waitLoop:
+		for {
+			select {
+			case n := <-trqNodes:
+				_nodes = append(_nodes, n)
+				_trqNodeIds = append(_trqNodeIds, n.ID)
+			case n := <-slurmNodes:
+				_nodes = append(_nodes, n)
+			case <-done:
+				break waitLoop
+			}
 		}
 
 		// sorts by node's hostname
@@ -405,13 +419,13 @@ var nodeStatusCmd = &cobra.Command{
 
 			// cluster and id
 			rdata := []string{
-				"torque",
+				"slurm",
 				n.ID,
 			}
 
-			// check if it is a slurm node
-			if slices.Index(_slurmNodeIds, n.ID) >= 0 {
-				rdata[0] = "slurm"
+			// check if it is a torque node
+			if slices.Index(_trqNodeIds, n.ID) >= 0 {
+				rdata[0] = "torque"
 			}
 
 			// cpu vendor
