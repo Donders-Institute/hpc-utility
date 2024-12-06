@@ -332,7 +332,7 @@ var nodeStatusCmd = &cobra.Command{
 					}
 
 					// torque trqResources (conditional)
-					if h != "ALL" && len(slurmResources) == 0 {
+					if h == "ALL" || len(slurmResources) == 0 {
 						trqResources, err := c.GetNodeResourceStatus(h)
 						if err != nil {
 							log.Errorf("%s: %s", c.SrvHost, err)
