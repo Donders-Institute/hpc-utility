@@ -270,19 +270,6 @@ var jobMeminfoCmd = &cobra.Command{
 	},
 }
 
-// node related subcommands
-type nodeType uint
-
-const (
-	access nodeType = iota
-	compute
-)
-
-var nodeTypeNames = map[nodeType]string{
-	access:  "access",
-	compute: "compute",
-}
-
 var nodeCmd = &cobra.Command{
 	Use:   "nodes",
 	Short: "Retrieve information about cluster nodes.",
@@ -291,72 +278,6 @@ var nodeCmd = &cobra.Command{
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	// TODO: get nodes overview
 	// },
-}
-
-var nodeMeminfoCmd = &cobra.Command{
-	Use:       "memfree [access|compute]",
-	Short:     "Print total and free memory of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.MemoryUsageAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.MemoryUsageComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
-}
-
-var nodeDiskinfoCmd = &cobra.Command{
-	Use:       "diskfree [access|compute]",
-	Short:     "Print total and free disk space of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
-}
-
-var nodeInfoCmd = &cobra.Command{
-	Use:       "info [access|compute]",
-	Short:     "Print system load and resource availability of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.InfoAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.InfoComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
 }
 
 var nodeStatusCmd = &cobra.Command{
@@ -630,7 +551,7 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					defer fml.Close()
 					scanner := bufio.NewScanner(fml)
 					for scanner.Scan() {
-						n := strings.Split(scanner.Text(), "")[0]
+						n := strings.Split(scanner.Text(), " ")[0]
 						if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
 							n = fmt.Sprintf("%s.%s", n, NetDomain)
 						}
