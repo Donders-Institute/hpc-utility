@@ -132,16 +132,19 @@ func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 			case "GresUsed":
 
 				// used tmp disk size
-				reTmp := regexp.MustCompile(`tmp:([0-9]+)G`)
+				reTmp := regexp.MustCompile(`tmp:([0-9]+)`)
 				tmpinfo := reTmp.FindStringSubmatch(keyValue[1])
 				if len(tmpinfo) < 2 {
 					return info, fmt.Errorf("unexpected tmpdir usage information: %s", keyValue[1])
 				}
-				tmpAllocated, err = strconv.Atoi(tmpinfo[1])
+				tmpBytes, err := strconv.Atoi(tmpinfo[1])
 				if err != nil {
 					log.Errorf("invalid number of tmpdir usage GB: %s", err)
 					return info, err
 				}
+
+				// convert to GB
+				tmpAllocated = tmpBytes >> 30
 
 			case "CfgTRES":
 				reGpu := regexp.MustCompile(`gres/gpu=([0-9]+)`)
