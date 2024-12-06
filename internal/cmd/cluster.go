@@ -630,7 +630,7 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					defer fml.Close()
 					scanner := bufio.NewScanner(fml)
 					for scanner.Scan() {
-						n := scanner.Text()
+						n := strings.Split(scanner.Text(), "")[0]
 						if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
 							n = fmt.Sprintf("%s.%s", n, NetDomain)
 						}
