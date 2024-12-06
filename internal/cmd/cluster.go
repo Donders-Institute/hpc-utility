@@ -322,7 +322,7 @@ var nodeStatusCmd = &cobra.Command{
 					log.Debugf("work on %s", h)
 
 					// slurm resources
-					slurmResources, err := slurm.GetNodeInfo(h)
+					slurmResources, err := slurm.GetNodeInfo(strings.TrimSuffix(h, fmt.Sprintf(".%s", NetDomain)))
 					if err != nil {
 						log.Errorf("fail get status of %s from Slurm: %s", h, err)
 					}
@@ -371,11 +371,16 @@ var nodeStatusCmd = &cobra.Command{
 	waitLoop:
 		for {
 			select {
-			case n := <-trqNodes:
-				_nodes = append(_nodes, n)
-				_trqNodeIds = append(_trqNodeIds, n.ID)
-			case n := <-slurmNodes:
-				_nodes = append(_nodes, n)
+			case n, ok := <-trqNodes:
+				if ok {
+					_nodes = append(_nodes, n)
+					_trqNodeIds = append(_trqNodeIds, n.ID)
+				}
+			case n, ok := <-slurmNodes:
+				if ok {
+					n.ID = fmt.Sprintf("%s.%s", n.ID, NetDomain)
+					_nodes = append(_nodes, n)
+				}
 			case <-done:
 				break waitLoop
 			}

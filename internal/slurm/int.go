@@ -55,7 +55,7 @@ func parseSingleNodeInfo(out string) (trqhelper.NodeResourceStatus, error) {
 		if keyValue := strings.SplitN(field, "=", 2); len(keyValue) == 2 {
 			switch keyValue[0] {
 			case "NodeName":
-				info.ID = fmt.Sprintf("%s.dccn.nl", strings.Split(keyValue[1], ".")[0])
+				info.ID = strings.Split(keyValue[1], ".")[0]
 			case "CPUEfctv":
 				nproc, err := strconv.Atoi(keyValue[1])
 				if err != nil {
