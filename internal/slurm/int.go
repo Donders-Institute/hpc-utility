@@ -232,17 +232,18 @@ func GetNodeInfo(id string) ([]trqhelper.NodeResourceStatus, error) {
 		args = append(args, id)
 	}
 
+	nodes := make([]trqhelper.NodeResourceStatus, 0)
+
 	stdout, stderr, ec, err := util.ExecCmd("scontrol", args)
 
 	if err != nil {
-		log.Fatalf("%s: exit code %d\n", err, ec)
+		return nodes, fmt.Errorf("%s: exit code %d", err, ec)
 	}
 	if ec != 0 {
-		log.Fatal(stderr.String())
+		return nodes, fmt.Errorf("%s", stderr.String())
 	}
 
 	nodeInfo := ""
-	nodes := make([]trqhelper.NodeResourceStatus, 0)
 
 	for {
 		line, err := stdout.ReadString('\n')
