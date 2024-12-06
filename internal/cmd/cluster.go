@@ -62,7 +62,7 @@ func init() {
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
 	nodeStatusCmd.Flags().StringSliceVarP(&nodeResourceShowFeatures, "features", "", []string{}, "toggle display of selected node features specified by a comma-separated list.")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
+	nodeCmd.AddCommand(nodeVncCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, matlabCmd, jobCmd, nodeCmd)
 
