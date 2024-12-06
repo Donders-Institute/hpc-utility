@@ -2,20 +2,20 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 
 	trqhelper "github.com/Donders-Institute/hpc-torque-helper/pkg/client"
 	dg "github.com/Donders-Institute/hpc-utility/internal/datagetter"
+	"github.com/Donders-Institute/hpc-utility/internal/slurm"
+	"github.com/Donders-Institute/hpc-utility/internal/util"
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -39,9 +39,10 @@ var nodeResourceShowProcs bool
 var nodeResourceShowGpus bool
 var nodeResourceShowMemGB bool
 var nodeResourceShowDiskGB bool
-var nodeResourceShowFeatures string
+var nodeResourceShowFeatures []string
 
-var nodeResourceDefFeatures []string = []string{"matlab", "cuda", "vgl", "lcmodel"}
+// this list of features consists of Torque node features and Slurm partitions
+var nodeResourceDefFeatures []string = []string{"matlab", "cuda", "vgl", "lcmodel", "gpu", "batch"}
 
 func init() {
 
@@ -59,9 +60,9 @@ func init() {
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowGpus, "gpus", "", false, "toggle display of GPU resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowMemGB, "mem", "", false, "toggle display of memory resource status")
 	nodeStatusCmd.Flags().BoolVarP(&nodeResourceShowDiskGB, "disk", "", false, "toggle display of disk resource status")
-	nodeStatusCmd.Flags().StringVarP(&nodeResourceShowFeatures, "features", "", "", "toggle display of selected node features specified by a comma-separated list.")
+	nodeStatusCmd.Flags().StringSliceVarP(&nodeResourceShowFeatures, "features", "", []string{}, "toggle display of selected node features specified by a comma-separated list.")
 
-	nodeCmd.AddCommand(nodeMeminfoCmd, nodeDiskinfoCmd, nodeVncCmd, nodeInfoCmd, nodeStatusCmd)
+	nodeCmd.AddCommand(nodeVncCmd, nodeStatusCmd)
 	jobCmd.AddCommand(jobTraceCmd, jobMeminfoCmd)
 	clusterCmd.AddCommand(qstatCmd, configCmd, matlabCmd, jobCmd, nodeCmd)
 
@@ -120,7 +121,7 @@ var matlabCmd = &cobra.Command{
 	Long:  ``,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		stdout, stderr, ec, err := execCmd("lmstat", []string{"-a"})
+		stdout, stderr, ec, err := util.ExecCmd("lmstat", []string{"-a"})
 		if err != nil {
 			log.Fatalf("%s: exit code %d\n", err, ec)
 		}
@@ -269,19 +270,6 @@ var jobMeminfoCmd = &cobra.Command{
 	},
 }
 
-// node related subcommands
-type nodeType uint
-
-const (
-	access nodeType = iota
-	compute
-)
-
-var nodeTypeNames = map[nodeType]string{
-	access:  "access",
-	compute: "compute",
-}
-
 var nodeCmd = &cobra.Command{
 	Use:   "nodes",
 	Short: "Retrieve information about cluster nodes.",
@@ -290,72 +278,6 @@ var nodeCmd = &cobra.Command{
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	// TODO: get nodes overview
 	// },
-}
-
-var nodeMeminfoCmd = &cobra.Command{
-	Use:       "memfree [access|compute]",
-	Short:     "Print total and free memory of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.MemoryUsageAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.MemoryUsageComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
-}
-
-var nodeDiskinfoCmd = &cobra.Command{
-	Use:       "diskfree [access|compute]",
-	Short:     "Print total and free disk space of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.DiskUsageComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
-}
-
-var nodeInfoCmd = &cobra.Command{
-	Use:       "info [access|compute]",
-	Short:     "Print system load and resource availability of cluster nodes.",
-	Long:      ``,
-	ValidArgs: []string{nodeTypeNames[access], nodeTypeNames[compute]},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			args = []string{nodeTypeNames[access], nodeTypeNames[compute]}
-		}
-		for _, n := range args {
-			switch n {
-			case nodeTypeNames[access]:
-				g := dg.GangliaDataGetter{Dataset: dg.InfoAccessNode}
-				g.GetPrint()
-			case nodeTypeNames[compute]:
-				g := dg.GangliaDataGetter{Dataset: dg.InfoComputeNode}
-				g.GetPrint()
-			}
-		}
-	},
 }
 
 var nodeStatusCmd = &cobra.Command{
@@ -370,7 +292,7 @@ var nodeStatusCmd = &cobra.Command{
 			nodeResourceShowGpus = true
 			nodeResourceShowMemGB = true
 			nodeResourceShowDiskGB = true
-			nodeResourceShowFeatures = strings.Join(nodeResourceDefFeatures, ",")
+			nodeResourceShowFeatures = nodeResourceDefFeatures
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -378,8 +300,9 @@ var nodeStatusCmd = &cobra.Command{
 			args = []string{"ALL"}
 		}
 
-		hosts := make(chan string, 4)
-		nodes := make(chan trqhelper.NodeResourceStatus)
+		hosts := make(chan string, len(args))
+		trqNodes := make(chan trqhelper.NodeResourceStatus)
+		slurmNodes := make(chan trqhelper.NodeResourceStatus)
 
 		// worker group
 		wg := new(sync.WaitGroup)
@@ -397,14 +320,28 @@ var nodeStatusCmd = &cobra.Command{
 			go func() {
 				for h := range hosts {
 					log.Debugf("work on %s", h)
-					resources, err := c.GetNodeResourceStatus(h)
+
+					// slurm resources
+					slurmResources, err := slurm.GetNodeInfo(strings.TrimSuffix(h, fmt.Sprintf(".%s", NetDomain)))
 					if err != nil {
-						log.Errorf("%s: %s", c.SrvHost, err)
+						log.Errorf("fail get status of %s from Slurm: %s", h, err)
 					}
 
-					for _, r := range resources {
-						if r.ID != "GLOBAL" {
-							nodes <- r
+					for _, r := range slurmResources {
+						slurmNodes <- r
+					}
+
+					// torque trqResources (conditional)
+					if h == "ALL" || len(slurmResources) == 0 {
+						trqResources, err := c.GetNodeResourceStatus(h)
+						if err != nil {
+							log.Errorf("%s: %s", c.SrvHost, err)
+						}
+
+						for _, r := range trqResources {
+							if r.ID != "GLOBAL" {
+								trqNodes <- r
+							}
 						}
 					}
 				}
@@ -414,24 +351,39 @@ var nodeStatusCmd = &cobra.Command{
 			}()
 		}
 
-		// filling up hosts
-		go func() {
-			for _, h := range args {
-				hosts <- h
-			}
-			close(hosts)
-		}()
+		for _, h := range args {
+			hosts <- h
+		}
+		close(hosts)
 
-		// wait for all workers to finish
+		done := make(chan bool)
 		go func() {
 			wg.Wait()
-			close(nodes)
+			close(trqNodes)
+			close(slurmNodes)
+			done <- true
 		}()
 
 		// reorganise internal data structure for sorting
 		var _nodes []trqhelper.NodeResourceStatus
-		for n := range nodes {
-			_nodes = append(_nodes, n)
+		var _trqNodeIds []string
+
+	waitLoop:
+		for {
+			select {
+			case n, ok := <-trqNodes:
+				if ok {
+					_nodes = append(_nodes, n)
+					_trqNodeIds = append(_trqNodeIds, n.ID)
+				}
+			case n, ok := <-slurmNodes:
+				if ok {
+					n.ID = fmt.Sprintf("%s.%s", n.ID, NetDomain)
+					_nodes = append(_nodes, n)
+				}
+			case <-done:
+				break waitLoop
+			}
 		}
 
 		// sorts by node's hostname
@@ -444,6 +396,7 @@ var nodeStatusCmd = &cobra.Command{
 
 		// table headers
 		headers := []string{
+			"cluster",
 			"hostname",
 			"cpu\nvendor",
 			"state",
@@ -461,7 +414,7 @@ var nodeStatusCmd = &cobra.Command{
 		if nodeResourceShowDiskGB {
 			headers = append(headers, "disk [gb]\n(avail/total)")
 		}
-		if nodeResourceShowFeatures != "" {
+		if len(nodeResourceShowFeatures) > 0 {
 			headers = append(headers, "features")
 		}
 		table.SetHeader(headers)
@@ -469,9 +422,15 @@ var nodeStatusCmd = &cobra.Command{
 		// table content
 		for _, n := range _nodes {
 
-			// id
+			// cluster and id
 			rdata := []string{
+				"slurm",
 				n.ID,
+			}
+
+			// check if it is a torque node
+			if slices.Index(_trqNodeIds, n.ID) >= 0 {
+				rdata[0] = "torque"
 			}
 
 			// cpu vendor
@@ -511,10 +470,10 @@ var nodeStatusCmd = &cobra.Command{
 			}
 
 			// features
-			if nodeResourceShowFeatures != "" {
+			if len(nodeResourceShowFeatures) > 0 {
 				features := []string{}
 				for _, f := range n.Features {
-					if strings.Index(nodeResourceShowFeatures, f) >= 0 {
+					if slices.Index(nodeResourceShowFeatures, f) >= 0 {
 						features = append(features, f)
 					}
 				}
@@ -526,7 +485,7 @@ var nodeStatusCmd = &cobra.Command{
 
 		table.SetHeaderAlignment(tablewriter.ALIGN_CENTER)
 		table.SetAlignment(tablewriter.ALIGN_RIGHT)
-		if nodeResourceShowFeatures != "" {
+		if len(nodeResourceShowFeatures) > 0 {
 			table.SetRowLine(true)
 		}
 		table.Render()
@@ -611,7 +570,7 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 					defer fml.Close()
 					scanner := bufio.NewScanner(fml)
 					for scanner.Scan() {
-						n := scanner.Text()
+						n := strings.Split(scanner.Text(), " ")[0]
 						if !strings.HasSuffix(n, fmt.Sprintf(".%s", NetDomain)) {
 							n = fmt.Sprintf("%s.%s", n, NetDomain)
 						}
@@ -683,25 +642,6 @@ When the username is specified by the "-u" option, only the VNCs owned by the us
 	},
 }
 
-// execCmd executes a system call and returns stdout, stderr and exit code of the execution.
-func execCmd(cmdName string, cmdArgs []string) (stdout, stderr bytes.Buffer, ec int32, err error) {
-	// Execute command and catch the stdout and stderr as byte buffer.
-	cmd := exec.Command(cmdName, cmdArgs...)
-	cmd.Env = os.Environ()
-	cmd.Stderr = &stderr
-	cmd.Stdout = &stdout
-	ec = 0
-	if err = cmd.Run(); err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			ws := exitError.Sys().(syscall.WaitStatus)
-			ec = int32(ws.ExitStatus())
-		} else {
-			ec = 1
-		}
-	}
-	return
-}
-
 // matlabLicense defines data structure of matlab license information and usage parsed from the
 // `lmstat -a` command.
 type matlabLicense struct {
@@ -722,7 +662,8 @@ type matlabLicenseUsageInfo struct {
 // matlabLicenseReservationInfo defines data structure of matlab license reservation.
 //
 // Note: the reservation is counted as actual usage regardless whether the reservation
-//       is actually being used.
+//
+//	is actually being used.
 type matlabLicenseReservationInfo struct {
 	Group           string
 	NumberOfLicense int
